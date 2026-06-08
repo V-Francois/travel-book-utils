@@ -28,6 +28,31 @@ canvas = Image.new(
 draw = ImageDraw.Draw(canvas, "RGBA")
 
 
+def make_noise_octave(width, height, cell_size):
+    grid_w = max(2, width // cell_size + 2)
+    grid_h = max(2, height // cell_size + 2)
+    grid = np.random.rand(grid_h, grid_w).astype(np.float32)
+    layer = Image.fromarray((grid * 255).astype(np.uint8), mode="L").resize(
+        (width, height), resample=Image.Resampling.BICUBIC
+    )
+    return np.asarray(layer, dtype=np.float32)
+
+
+def make_granulation_field(width, height):
+    noise = (
+        make_noise_octave(width, height, 220) * 0.36
+        + make_noise_octave(width, height, 96) * 0.28
+        + make_noise_octave(width, height, 42) * 0.22
+        + make_noise_octave(width, height, 18) * 0.14
+    )
+
+    noise = (noise - noise.min()) / (np.ptp(noise) or 1.0)
+    return (noise * 255).astype(np.uint8)
+
+
+GRANULATION = make_granulation_field(WIDTH, HEIGHT)
+
+
 def project(x, y):
     px = (x - minx) / (maxx - minx)
     py = (y - miny) / (maxy - miny)
@@ -83,6 +108,39 @@ def draw_geometry(geom, fill):
             draw_geometry(part, fill)
 
 
+def granulation_fill(poly, color):
+    # Use a coherent noise field so pigment clusters feel like watercolor granulation.
+    area_scale = max(1.0, float(poly.area) / 500_000.0)
+    samples = min(180, max(20, int(24 * area_scale)))
+    max_radius = 2 + min(8, int(area_scale))
+
+    for _ in range(samples):
+        try:
+            x, y = random_point_in_polygon(poly)
+            px, py = project(x, y)
+            if px < 0 or py < 0 or px >= WIDTH or py >= HEIGHT:
+                continue
+
+            noise_value = int(GRANULATION[py, px])
+            if noise_value < 120:
+                continue
+
+            intensity = (noise_value - 120) / 135.0
+            radius = random.randint(1, max_radius) + int(intensity * 4)
+            pigment = boost_color(
+                clamp_color(tuple(v * random.uniform(0.78, 0.94) for v in color)),
+                saturation=random.uniform(1.02, 1.12),
+                value=random.uniform(0.90, 1.0),
+            )
+            alpha = int(8 + intensity * 42)
+            draw.ellipse(
+                (px - radius, py - radius, px + radius, py + radius),
+                fill=(*pigment, alpha),
+            )
+        except Exception:
+            pass
+
+
 def watercolor_fill(poly, color, N=18):
     # Build the wash from a few larger, translucent passes plus smaller
     # darker accents. That keeps each polygon from looking like a flat fill.
@@ -101,7 +159,13 @@ def watercolor_fill(poly, color, N=18):
             for _ in range(max(1, N // 4)):
                 q = jitter_polygon(p, amount=jitter)
                 pts = [project(x, y) for x, y in q.exterior.coords]
-                draw.polygon(pts, fill=(*boost_color(tint_color(color, 14), 1.15, 1.04), int(255 * alpha)))
+                draw.polygon(
+                    pts,
+                    fill=(
+                        *boost_color(tint_color(color, 14), 1.15, 1.04),
+                        int(255 * alpha),
+                    ),
+                )
         except Exception:
             pass
 
@@ -127,7 +191,11 @@ def watercolor_fill(poly, color, N=18):
     for width, alpha, shade_scale in zip(ring_widths, ring_alphas, ring_shades):
         try:
             inner = poly.buffer(-width)
-            ring = poly.difference(inner) if not inner.is_empty else poly.buffer(width).difference(poly)
+            ring = (
+                poly.difference(inner)
+                if not inner.is_empty
+                else poly.buffer(width).difference(poly)
+            )
             ring = ring.buffer(0)
             ring_fill = boost_color(
                 clamp_color(tuple(v * shade_scale for v in color)),
@@ -137,6 +205,8 @@ def watercolor_fill(poly, color, N=18):
             draw_geometry(ring, (*ring_fill, alpha))
         except Exception:
             pass
+
+    granulation_fill(poly, color)
 
 
 colors = {
