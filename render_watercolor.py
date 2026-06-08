@@ -8,8 +8,8 @@ from PIL import ImageDraw
 from shapely.geometry import Polygon
 from shapely.geometry import MultiPolygon
 
-WIDTH = 8000
-HEIGHT = 8000
+WIDTH = 12000
+HEIGHT = 12000
 
 land = gpd.read_file("landcover.geojson")
 roads = gpd.read_file("roads.geojson")
@@ -106,6 +106,43 @@ def draw_geometry(geom, fill):
     if isinstance(geom, MultiPolygon):
         for part in geom.geoms:
             draw_geometry(part, fill)
+
+
+def draw_border_geometry(geom, fill, width=2):
+    if geom.is_empty:
+        return
+
+    def draw_ring(coords, base_width):
+        # A few jittered passes keep the border from looking like a crisp vector line.
+        for stroke_width, alpha, jitter in [
+            (base_width + 1, 120, 3),
+            (base_width, 95, 2),
+            (base_width - 1, 70, 1),
+        ]:
+            if stroke_width < 1:
+                continue
+
+            pts = []
+            for x, y in coords:
+                pts.append(
+                    project(
+                        x + random.uniform(-jitter, jitter),
+                        y + random.uniform(-jitter, jitter),
+                    )
+                )
+
+            draw.line(pts, fill=(*fill[:3], alpha), width=stroke_width)
+
+    if isinstance(geom, Polygon):
+        exterior = [project(x, y) for x, y in geom.exterior.coords]
+        draw_ring(geom.exterior.coords, width)
+        for interior in geom.interiors:
+            draw_ring(interior.coords, width)
+        return
+
+    if isinstance(geom, MultiPolygon):
+        for part in geom.geoms:
+            draw_border_geometry(part, fill, width=width)
 
 
 def granulation_fill(poly, color):
@@ -209,6 +246,10 @@ def watercolor_fill(poly, color, N=18):
     granulation_fill(poly, color)
 
 
+def white_border(poly):
+    draw_border_geometry(poly, (255, 255, 255, 190), width=2)
+
+
 colors = {
     "forest": (76, 152, 76),
     "tree": (82, 158, 82),
@@ -247,6 +288,7 @@ for _, row in land.iterrows():
     for poly in polygons:
         # Finer polygons need fewer passes; the jitter already creates texture.
         watercolor_fill(poly, color)
+        white_border(poly)
 
 
 for _, row in roads.iterrows():
