@@ -24,8 +24,12 @@ bounds = land.total_bounds
 
 minx, miny, maxx, maxy = bounds
 
+MAP_UNITS_PER_PIXEL = (
+    ((maxx - minx) / WIDTH) + ((maxy - miny) / HEIGHT)
+) / 2.0
+
 canvas = Image.new(
-    "RGBA", (WIDTH, HEIGHT), (228, 223, 200, 255)
+    "RGBA", (WIDTH, HEIGHT), (249, 247, 241, 255)
 )  # (245, 242, 232, 255))
 
 draw = ImageDraw.Draw(canvas, "RGBA")
@@ -267,11 +271,12 @@ def white_border(poly):
     draw_border_geometry(poly, (255, 255, 255, 190), width=2)
 
 
-def shrink_geometry(geom, pixels=5):
+def shrink_geometry(geom, pixels=2):
     shrunk_parts = []
+    inset = pixels * MAP_UNITS_PER_PIXEL
 
     for poly in iter_polygons(geom):
-        shrunk = poly.buffer(-pixels)
+        shrunk = poly.buffer(-inset)
         if shrunk.is_empty:
             shrunk_parts.append(poly)
         else:
@@ -320,7 +325,7 @@ for color, geometries in grouped.items():
 
     # Finer polygons need fewer passes; the jitter already creates texture.
     for poly in iter_polygons(merged):
-        # white_border(poly)
+        white_border(poly)
         watercolor_fill(poly, color)
 
 

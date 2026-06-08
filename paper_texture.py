@@ -19,7 +19,7 @@ def smooth_noise(width, height, scale, strength, blur):
         (width, height), resample=Image.Resampling.BICUBIC
     )
     layer = layer.filter(ImageFilter.GaussianBlur(radius=blur)).point(
-        lambda p: max(0, min(255, int(236 + (p - 128) * strength / 32)))
+        lambda p: max(0, min(255, int(246 + (p - 128) * strength / 48)))
     )
     return layer.convert("RGB")
 
@@ -30,13 +30,15 @@ coarse = smooth_noise(w, h, scale=140, strength=18, blur=6.0)
 fibers = smooth_noise(w, h, scale=10, strength=4, blur=0.4)
 
 paper = ImageChops.multiply(fine, coarse)
-paper = ImageChops.add(paper, fibers, scale=2.8, offset=-22)
-paper = ImageEnhance.Contrast(paper).enhance(1.08)
-paper = ImageEnhance.Color(paper).enhance(1.02)
+paper = ImageChops.add(paper, fibers, scale=3.2, offset=-12)
+paper = ImageEnhance.Contrast(paper).enhance(1.02)
+paper = ImageEnhance.Brightness(paper).enhance(1.08)
+paper = ImageEnhance.Color(paper).enhance(0.98)
 
 texture = ImageChops.multiply(img, paper)
-texture = ImageChops.blend(texture, img, alpha=0.12)
-final = ImageChops.blend(img, texture, alpha=0.72)
-final = ImageEnhance.Color(final).enhance(1.24)
+texture = ImageChops.blend(texture, img, alpha=0.08)
+final = ImageChops.blend(img, texture, alpha=0.58)
+final = ImageEnhance.Brightness(final).enhance(1.06)
+final = ImageEnhance.Color(final).enhance(1.14)
 
 final.save("watercolor_map.png")
