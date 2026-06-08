@@ -267,6 +267,22 @@ def white_border(poly):
     draw_border_geometry(poly, (255, 255, 255, 190), width=2)
 
 
+def shrink_geometry(geom, pixels=5):
+    shrunk_parts = []
+
+    for poly in iter_polygons(geom):
+        shrunk = poly.buffer(-pixels)
+        if shrunk.is_empty:
+            shrunk_parts.append(poly)
+        else:
+            shrunk_parts.append(shrunk)
+
+    if not shrunk_parts:
+        return geom
+
+    return unary_union(shrunk_parts).buffer(0)
+
+
 colors = {
     "forest": (76, 152, 76),
     "tree": (82, 158, 82),
@@ -300,11 +316,12 @@ for _, row in land.iterrows():
 
 for color, geometries in grouped.items():
     merged = unary_union(geometries).buffer(0)
+    merged = shrink_geometry(merged, pixels=2)
 
     # Finer polygons need fewer passes; the jitter already creates texture.
     for poly in iter_polygons(merged):
+        # white_border(poly)
         watercolor_fill(poly, color)
-        white_border(poly)
 
 
 for _, row in roads.iterrows():
