@@ -5,8 +5,11 @@ import geopandas as gpd
 from PIL import Image
 from PIL import ImageDraw
 
+from shapely.geometry import GeometryCollection
+from shapely.geometry import Point
 from shapely.geometry import Polygon
 from shapely.geometry import MultiPolygon
+from shapely.ops import unary_union
 
 WIDTH = 12000
 HEIGHT = 12000
@@ -95,23 +98,43 @@ def tint_color(color, variation=12):
     )
 
 
-def draw_geometry(geom, fill):
+def random_point_in_polygon(poly, attempts=30):
+    minx, miny, maxx, maxy = poly.bounds
+
+    for _ in range(attempts):
+        x = random.uniform(minx, maxx)
+        y = random.uniform(miny, maxy)
+        if poly.contains(Point(x, y)):
+            return x, y
+
+    point = poly.representative_point()
+    return point.x, point.y
+
+
+def iter_polygons(geom):
     if geom.is_empty:
         return
 
     if isinstance(geom, Polygon):
-        draw.polygon([project(x, y) for x, y in geom.exterior.coords], fill=fill)
+        yield geom
         return
 
     if isinstance(geom, MultiPolygon):
         for part in geom.geoms:
-            draw_geometry(part, fill)
+            yield from iter_polygons(part)
+        return
+
+    if isinstance(geom, GeometryCollection):
+        for part in geom.geoms:
+            yield from iter_polygons(part)
+
+
+def draw_geometry(geom, fill):
+    for poly in iter_polygons(geom):
+        draw.polygon([project(x, y) for x, y in poly.exterior.coords], fill=fill)
 
 
 def draw_border_geometry(geom, fill, width=2):
-    if geom.is_empty:
-        return
-
     def draw_ring(coords, base_width):
         # A few jittered passes keep the border from looking like a crisp vector line.
         for stroke_width, alpha, jitter in [
@@ -133,16 +156,10 @@ def draw_border_geometry(geom, fill, width=2):
 
             draw.line(pts, fill=(*fill[:3], alpha), width=stroke_width)
 
-    if isinstance(geom, Polygon):
-        exterior = [project(x, y) for x, y in geom.exterior.coords]
-        draw_ring(geom.exterior.coords, width)
-        for interior in geom.interiors:
+    for poly in iter_polygons(geom):
+        draw_ring(poly.exterior.coords, width)
+        for interior in poly.interiors:
             draw_ring(interior.coords, width)
-        return
-
-    if isinstance(geom, MultiPolygon):
-        for part in geom.geoms:
-            draw_border_geometry(part, fill, width=width)
 
 
 def granulation_fill(poly, color):
@@ -261,6 +278,8 @@ colors = {
     "reservoir": (68, 170, 232),
 }
 
+grouped = {}
+
 for _, row in land.iterrows():
     geom = row.geometry
 
@@ -277,16 +296,13 @@ for _, row in land.iterrows():
     else:
         continue
 
-    polygons = []
+    grouped.setdefault(color, []).append(geom)
 
-    if isinstance(geom, Polygon):
-        polygons = [geom]
+for color, geometries in grouped.items():
+    merged = unary_union(geometries).buffer(0)
 
-    elif isinstance(geom, MultiPolygon):
-        polygons = list(geom.geoms)
-
-    for poly in polygons:
-        # Finer polygons need fewer passes; the jitter already creates texture.
+    # Finer polygons need fewer passes; the jitter already creates texture.
+    for poly in iter_polygons(merged):
         watercolor_fill(poly, color)
         white_border(poly)
 
