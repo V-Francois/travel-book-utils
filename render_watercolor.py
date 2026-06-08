@@ -70,6 +70,19 @@ def tint_color(color, variation=12):
     )
 
 
+def draw_geometry(geom, fill):
+    if geom.is_empty:
+        return
+
+    if isinstance(geom, Polygon):
+        draw.polygon([project(x, y) for x, y in geom.exterior.coords], fill=fill)
+        return
+
+    if isinstance(geom, MultiPolygon):
+        for part in geom.geoms:
+            draw_geometry(part, fill)
+
+
 def watercolor_fill(poly, color, N=18):
     # Build the wash from a few larger, translucent passes plus smaller
     # darker accents. That keeps each polygon from looking like a flat fill.
@@ -103,6 +116,25 @@ def watercolor_fill(poly, color, N=18):
                 value=1.0,
             )
             draw.polygon(pts, fill=(*shade, random.randint(18, 35)))
+        except Exception:
+            pass
+
+    # Darken the perimeter with a few thin interior rings derived from buffers.
+    ring_widths = [18, 42, 78]
+    ring_alphas = [42, 28, 16]
+    ring_shades = [0.72, 0.82, 0.9]
+
+    for width, alpha, shade_scale in zip(ring_widths, ring_alphas, ring_shades):
+        try:
+            inner = poly.buffer(-width)
+            ring = poly.difference(inner) if not inner.is_empty else poly.buffer(width).difference(poly)
+            ring = ring.buffer(0)
+            ring_fill = boost_color(
+                clamp_color(tuple(v * shade_scale for v in color)),
+                saturation=1.05,
+                value=0.92,
+            )
+            draw_geometry(ring, (*ring_fill, alpha))
         except Exception:
             pass
 
