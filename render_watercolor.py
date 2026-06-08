@@ -8,8 +8,8 @@ from PIL import ImageDraw
 from shapely.geometry import Polygon
 from shapely.geometry import MultiPolygon
 
-WIDTH = 4000
-HEIGHT = 4000
+WIDTH = 8000
+HEIGHT = 8000
 
 land = gpd.read_file("landcover.geojson")
 roads = gpd.read_file("roads.geojson")
@@ -129,8 +129,8 @@ def granulation_fill(poly, color):
             radius = random.randint(1, max_radius) + int(intensity * 4)
             pigment = boost_color(
                 clamp_color(tuple(v * random.uniform(0.78, 0.94) for v in color)),
-                saturation=random.uniform(1.02, 1.12),
-                value=random.uniform(0.90, 1.0),
+                saturation=random.uniform(1.12, 1.26),
+                value=random.uniform(0.98, 1.08),
             )
             alpha = int(8 + intensity * 42)
             draw.ellipse(
@@ -145,9 +145,9 @@ def watercolor_fill(poly, color, N=18):
     # Build the wash from a few larger, translucent passes plus smaller
     # darker accents. That keeps each polygon from looking like a flat fill.
     passes = [
-        (1.8, 24, 0.16),
-        (1.0, 18, 0.22),
-        (0.7, 12, 0.28),
+        (1.8, 24, 0.12),
+        (1.0, 18, 0.16),
+        (0.7, 12, 0.20),
     ]
 
     for scale, jitter, alpha in passes:
@@ -162,7 +162,7 @@ def watercolor_fill(poly, color, N=18):
                 draw.polygon(
                     pts,
                     fill=(
-                        *boost_color(tint_color(color, 14), 1.15, 1.04),
+                        *boost_color(tint_color(color, 18), 1.30, 1.08),
                         int(255 * alpha),
                     ),
                 )
@@ -176,16 +176,16 @@ def watercolor_fill(poly, color, N=18):
             pts = [project(x, y) for x, y in p.exterior.coords]
             shade = boost_color(
                 clamp_color(tuple(v * random.uniform(0.84, 0.96) for v in color)),
-                saturation=1.06,
-                value=1.0,
+                saturation=1.14,
+                value=1.04,
             )
-            draw.polygon(pts, fill=(*shade, random.randint(18, 35)))
+            draw.polygon(pts, fill=(*shade, random.randint(10, 22)))
         except Exception:
             pass
 
     # Darken the perimeter with a few thin interior rings derived from buffers.
     ring_widths = [18, 42, 78]
-    ring_alphas = [42, 28, 16]
+    ring_alphas = [26, 18, 12]
     ring_shades = [0.72, 0.82, 0.9]
 
     for width, alpha, shade_scale in zip(ring_widths, ring_alphas, ring_shades):
@@ -199,8 +199,8 @@ def watercolor_fill(poly, color, N=18):
             ring = ring.buffer(0)
             ring_fill = boost_color(
                 clamp_color(tuple(v * shade_scale for v in color)),
-                saturation=1.05,
-                value=0.92,
+                saturation=1.16,
+                value=0.98,
             )
             draw_geometry(ring, (*ring_fill, alpha))
         except Exception:
@@ -210,14 +210,14 @@ def watercolor_fill(poly, color, N=18):
 
 
 colors = {
-    "forest": (88, 142, 86),
-    "tree": (92, 146, 90),
-    "farmland": (214, 189, 96),
-    "meadow": (205, 182, 104),
+    "forest": (76, 152, 76),
+    "tree": (82, 158, 82),
+    "farmland": (236, 198, 72),
+    "meadow": (226, 190, 86),
     "residential": (204, 162, 150),
-    "basin": (94, 158, 214),
-    "water": (92, 160, 218),
-    "reservoir": (90, 156, 214),
+    "basin": (70, 170, 232),
+    "water": (66, 174, 238),
+    "reservoir": (68, 170, 232),
 }
 
 for _, row in land.iterrows():
@@ -257,8 +257,8 @@ for _, row in roads.iterrows():
 
     pts = [project(x, y) for x, y in geom.coords]
 
-    draw.line(pts, fill=(112, 102, 92, 210), width=3)
-    draw.line(pts, fill=(72, 66, 60, 120), width=1)
+    draw.line(pts, fill=(118, 106, 92, 180), width=3)
+    draw.line(pts, fill=(80, 72, 66, 90), width=1)
 
 
 canvas.save("watercolor_base.png")
