@@ -50,6 +50,15 @@ def clamp_color(value):
     return tuple(max(0, min(255, int(v))) for v in value)
 
 
+def boost_color(color, saturation=1.12, value=1.03):
+    r, g, b = color
+    avg = (r + g + b) / 3.0
+    r = avg + (r - avg) * saturation
+    g = avg + (g - avg) * saturation
+    b = avg + (b - avg) * saturation
+    return clamp_color((r * value, g * value, b * value))
+
+
 def tint_color(color, variation=12):
     r, g, b = color
     return clamp_color(
@@ -65,9 +74,9 @@ def watercolor_fill(poly, color, N=18):
     # Build the wash from a few larger, translucent passes plus smaller
     # darker accents. That keeps each polygon from looking like a flat fill.
     passes = [
-        (1.8, 24, 0.12),
-        (1.0, 18, 0.18),
-        (0.7, 12, 0.22),
+        (1.8, 24, 0.16),
+        (1.0, 18, 0.22),
+        (0.7, 12, 0.28),
     ]
 
     for scale, jitter, alpha in passes:
@@ -79,7 +88,7 @@ def watercolor_fill(poly, color, N=18):
             for _ in range(max(1, N // 4)):
                 q = jitter_polygon(p, amount=jitter)
                 pts = [project(x, y) for x, y in q.exterior.coords]
-                draw.polygon(pts, fill=(*tint_color(color, 18), int(255 * alpha)))
+                draw.polygon(pts, fill=(*boost_color(tint_color(color, 14), 1.15, 1.04), int(255 * alpha)))
         except Exception:
             pass
 
@@ -88,21 +97,25 @@ def watercolor_fill(poly, color, N=18):
         try:
             p = jitter_polygon(poly, amount=8)
             pts = [project(x, y) for x, y in p.exterior.coords]
-            shade = clamp_color(tuple(v * random.uniform(0.82, 0.95) for v in color))
+            shade = boost_color(
+                clamp_color(tuple(v * random.uniform(0.84, 0.96) for v in color)),
+                saturation=1.06,
+                value=1.0,
+            )
             draw.polygon(pts, fill=(*shade, random.randint(18, 35)))
         except Exception:
             pass
 
 
 colors = {
-    "forest": (93, 135, 92),
-    "tree": (96, 139, 95),
-    "farmland": (202, 188, 122),
-    "meadow": (192, 180, 126),
-    "residential": (198, 170, 160),
-    "basin": (120, 165, 205),
-    "water": (118, 165, 205),
-    "reservoir": (116, 162, 202),
+    "forest": (88, 142, 86),
+    "tree": (92, 146, 90),
+    "farmland": (214, 189, 96),
+    "meadow": (205, 182, 104),
+    "residential": (204, 162, 150),
+    "basin": (94, 158, 214),
+    "water": (92, 160, 218),
+    "reservoir": (90, 156, 214),
 }
 
 for _, row in land.iterrows():
@@ -142,8 +155,8 @@ for _, row in roads.iterrows():
 
     pts = [project(x, y) for x, y in geom.coords]
 
-    draw.line(pts, fill=(105, 100, 95, 200), width=3)
-    draw.line(pts, fill=(70, 65, 60, 110), width=1)
+    draw.line(pts, fill=(112, 102, 92, 210), width=3)
+    draw.line(pts, fill=(72, 66, 60, 120), width=1)
 
 
 canvas.save("watercolor_base.png")
