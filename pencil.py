@@ -311,6 +311,10 @@ def label_place(ax, x, y, text, color, fontsize=16):
     )
 
 
+def draw_place_dot(ax, x, y, color, size=180):
+    ax.scatter([x], [y], s=size, c=color, alpha=0.95, zorder=40, linewidths=0)
+
+
 def add_paper_texture(ax, extent):
     """
     Simple procedural paper texture: faint grayscale noise.
@@ -487,12 +491,31 @@ if start_xy and end_xy:
     draw_route_flag(ax, end_xy, ROUTE_COLOR, marker_size)
 
 for _, row in places.iterrows():
+    name = str(row.get("name", "")).strip()
+    if name == "nan":
+        name = ""
     img_name = row.get("img")
     if pd.notna(img_name) and str(img_name).strip():
-        if not add_place_image(ax, row.geometry.x, row.geometry.y, img_name, width_px=120):
-            label_place(ax, row.geometry.x, row.geometry.y, row["name"], color="#3f2d1f", fontsize=22)
+        if not add_place_image(
+            ax, row.geometry.x, row.geometry.y, img_name, width_px=120
+        ):
+            if name:
+                label_place(
+                    ax,
+                    row.geometry.x,
+                    row.geometry.y,
+                    name,
+                    color="#3f2d1f",
+                    fontsize=22,
+                )
+            else:
+                draw_place_dot(ax, row.geometry.x, row.geometry.y, ROUTE_COLOR)
+    elif name:
+        label_place(
+            ax, row.geometry.x, row.geometry.y, name, color="#3f2d1f", fontsize=22
+        )
     else:
-        label_place(ax, row.geometry.x, row.geometry.y, row["name"], color="#3f2d1f", fontsize=22)
+        draw_place_dot(ax, row.geometry.x, row.geometry.y, ROUTE_COLOR)
 
 pencil_plot_lines(
     ax,
