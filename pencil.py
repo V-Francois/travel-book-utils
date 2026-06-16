@@ -2,7 +2,9 @@ import osmnx as ox
 import geopandas as gpd
 import matplotlib.pyplot as plt
 import matplotlib.patches as mpatches
+import matplotlib.patheffects as path_effects
 import numpy as np
+import pandas as pd
 import xml.etree.ElementTree as ET
 
 from shapely.geometry import (
@@ -19,9 +21,8 @@ from shapely.ops import transform
 # ----------------------------
 # Area: your bounding box
 # ----------------------------
-ROUTE_BUFFER_METERS = 400
+ROUTE_BUFFER_METERS = 600
 ROUTE_COLOR = "#F56F16"  # Ochre
-ROUTE_COLOR = "#6416F5"
 
 
 # ----------------------------
@@ -82,6 +83,23 @@ def route_endpoints(geom):
         return first, last
 
     return None, None
+
+
+def places_from_csv(path):
+    try:
+        df = pd.read_csv(path)
+    except Exception as e:
+        print(f"Could not read {path}: {e}")
+        return gpd.GeoDataFrame(geometry=[], crs="EPSG:4326")
+
+    if df.empty or not {"name", "x", "y"}.issubset(df.columns):
+        return gpd.GeoDataFrame(geometry=[], crs="EPSG:4326")
+
+    # CSV uses x=latitude and y=longitude.
+    geometry = gpd.points_from_xy(df["y"], df["x"])
+    gdf = gpd.GeoDataFrame(df.copy(), geometry=geometry, crs="EPSG:4326")
+    gdf["name"] = gdf["name"].astype(str).str.strip()
+    return gdf[gdf["name"] != ""].copy()
 
 
 def bbox_from_route(route_gdf, buffer_meters):
@@ -250,6 +268,23 @@ def draw_route_flag(ax, xy, color, size):
     ax.add_patch(pennant)
 
 
+def label_place(ax, x, y, text, color, fontsize=16):
+    ax.text(
+        x,
+        y,
+        text,
+        color=color,
+        fontsize=fontsize,
+        ha="center",
+        va="center",
+        zorder=40,
+        path_effects=[
+            path_effects.Stroke(linewidth=3, foreground="#fcfaf4", alpha=0.92),
+            path_effects.Normal(),
+        ],
+    )
+
+
 def add_paper_texture(ax, extent):
     """
     Simple procedural paper texture: faint grayscale noise.
@@ -273,6 +308,9 @@ route = route_from_gpx("route.gpx")
 bbox = bbox_from_route(route, ROUTE_BUFFER_METERS)
 if bbox is None:
     raise RuntimeError("route.gpx did not contain any track points")
+
+print("Loading places...")
+places = places_from_csv("places.csv")
 
 
 # ----------------------------
@@ -340,6 +378,7 @@ forest = forest.to_crs(target_crs)
 wood = wood.to_crs(target_crs)
 trees = trees.to_crs(target_crs)
 route = route.to_crs(target_crs)
+places = places.to_crs(target_crs)
 buildings = buildings.to_crs(target_crs)
 # pois = pois.to_crs(target_crs)
 
@@ -420,6 +459,17 @@ if start_xy and end_xy:
     marker_size = route_scale * 0.02
     draw_route_start(ax, start_xy, ROUTE_COLOR, marker_size)
     draw_route_flag(ax, end_xy, ROUTE_COLOR, marker_size)
+
+for _, row in places.iterrows():
+    fontsize = 22
+    label_place(
+        ax,
+        row.geometry.x,
+        row.geometry.y,
+        row["name"],
+        color="#3f2d1f",
+        fontsize=fontsize,
+    )
 
 pencil_plot_lines(
     ax,
