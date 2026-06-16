@@ -114,6 +114,40 @@ def pencil_plot_lines(ax, gdf, color="0.15", linewidth=0.7, alpha=0.35, passes=3
         sketch.plot(ax=ax, color=color, linewidth=linewidth, alpha=alpha, zorder=5)
 
 
+def pencil_plot_points(ax, gdf, color="0.15", size=8, alpha=0.3, passes=2):
+    if gdf.empty:
+        return
+
+    for _ in range(passes):
+        sketch = gdf.copy()
+        sketch["geometry"] = sketch.geometry.apply(
+            lambda g: jitter_geometry(g, PENCIL_JITTER_METERS)
+        )
+
+        xs = []
+        ys = []
+        for geom in sketch.geometry:
+            if isinstance(geom, Point):
+                xs.append(geom.x)
+                ys.append(geom.y)
+            elif isinstance(geom, MultiPoint):
+                for pt in geom.geoms:
+                    xs.append(pt.x)
+                    ys.append(pt.y)
+
+        if xs:
+            ax.scatter(xs, ys, s=size, c=color, alpha=alpha, zorder=4, linewidths=0)
+
+
+def soften_geometry(geom, amount=10):
+    if geom is None or geom.is_empty:
+        return geom
+
+    # Smooth sharp polygon corners by shrinking and re-expanding the shape.
+    softened = geom.buffer(-amount).buffer(amount)
+    return softened if not softened.is_empty else geom
+
+
 def pencil_plot_polygons(ax, gdf, facecolor="0.9", edgecolor="0.25", alpha=0.28):
     if gdf.empty:
         return
@@ -160,6 +194,11 @@ waterways = safe_features_from_bbox({"waterway": ["river", "stream", "canal", "d
 print("Downloading water bodies...")
 water = safe_features_from_bbox({"natural": "water", "water": True})
 
+print("Downloading forests/trees...")
+forest = safe_features_from_bbox({"landuse": "forest"})
+wood = safe_features_from_bbox({"natural": "wood"})
+trees = safe_features_from_bbox({"natural": "tree"})
+
 print("Downloading buildings...")
 buildings = safe_features_from_bbox({"building": True})
 
@@ -190,6 +229,9 @@ roads = roads.set_crs("EPSG:4326", allow_override=True)
 
 waterways = keep_geom_types(waterways, ["LineString", "MultiLineString"])
 water = keep_geom_types(water, ["Polygon", "MultiPolygon"])
+forest = keep_geom_types(forest, ["Polygon", "MultiPolygon"])
+wood = keep_geom_types(wood, ["Polygon", "MultiPolygon"])
+trees = keep_geom_types(trees, ["Point", "MultiPoint"])
 buildings = keep_geom_types(buildings, ["Polygon", "MultiPolygon"])
 # pois = keep_geom_types(pois, ["Point", "MultiPoint"])
 
@@ -200,6 +242,9 @@ target_crs = all_for_crs.estimate_utm_crs()
 roads = roads.to_crs(target_crs)
 waterways = waterways.to_crs(target_crs)
 water = water.to_crs(target_crs)
+forest = forest.to_crs(target_crs)
+wood = wood.to_crs(target_crs)
+trees = trees.to_crs(target_crs)
 buildings = buildings.to_crs(target_crs)
 # pois = pois.to_crs(target_crs)
 
@@ -248,6 +293,16 @@ add_paper_texture(ax, extent)
 
 # Water bodies: blue fill
 pencil_plot_polygons(ax, water, facecolor="#8fbfe0", edgecolor="#4f84a8", alpha=0.30)
+
+# Forests and trees: light green fill
+forest_soft = forest.copy()
+forest_soft["geometry"] = forest_soft.geometry.apply(lambda g: soften_geometry(g, 14))
+wood_soft = wood.copy()
+wood_soft["geometry"] = wood_soft.geometry.apply(lambda g: soften_geometry(g, 14))
+
+pencil_plot_polygons(ax, forest_soft, facecolor="#c6dfb4", edgecolor="#a9c998", alpha=0.24)
+pencil_plot_polygons(ax, wood_soft, facecolor="#c6dfb4", edgecolor="#a9c998", alpha=0.24)
+pencil_plot_points(ax, trees, color="#86ad73", size=8, alpha=0.28, passes=2)
 
 # Buildings: faint graphite blocks
 pencil_plot_polygons(ax, buildings, facecolor="0.62", edgecolor="0.35", alpha=0.12)
