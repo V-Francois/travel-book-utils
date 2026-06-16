@@ -246,14 +246,14 @@ ax.set_facecolor("#f7f2e8")
 
 add_paper_texture(ax, extent)
 
-# Water bodies: pale pencil fill
-pencil_plot_polygons(ax, water, facecolor="0.82", edgecolor="0.25", alpha=0.22)
+# Water bodies: blue fill
+pencil_plot_polygons(ax, water, facecolor="#8fbfe0", edgecolor="#4f84a8", alpha=0.30)
 
 # Buildings: faint graphite blocks
 pencil_plot_polygons(ax, buildings, facecolor="0.62", edgecolor="0.35", alpha=0.12)
 
 # Waterways
-pencil_plot_lines(ax, waterways, color="0.30", linewidth=1.15, alpha=0.32, passes=4)
+pencil_plot_lines(ax, waterways, color="#4f84a8", linewidth=1.15, alpha=0.38, passes=4)
 
 # Roads
 pencil_plot_lines(
