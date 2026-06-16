@@ -20,7 +20,8 @@ from shapely.ops import transform
 # Area: your bounding box
 # ----------------------------
 ROUTE_BUFFER_METERS = 400
-ROUTE_COLOR = "#F56F16"
+ROUTE_COLOR = "#F56F16"  # Ochre
+ROUTE_COLOR = "#6416F5"
 
 
 # ----------------------------
@@ -28,7 +29,7 @@ ROUTE_COLOR = "#F56F16"
 # ----------------------------
 RANDOM_SEED = 42
 N_JITTER_PASSES = 3
-PENCIL_JITTER_METERS = 2
+PENCIL_JITTER_METERS = 4
 FIGSIZE = (10, 13)
 DPI = 300
 
@@ -234,7 +235,7 @@ def draw_route_flag(ax, xy, color, size):
     flag_w = size * 1.15
     flag_h = size * 0.9
 
-    ax.plot([x, x], [y, y + pole_h], color=color, linewidth=1.8, zorder=30)
+    ax.plot([x, x], [y, y + pole_h], color="black", linewidth=1.8, zorder=30)
     pennant = mpatches.Polygon(
         [
             [x, y + pole_h],
@@ -243,7 +244,7 @@ def draw_route_flag(ax, xy, color, size):
         ],
         closed=True,
         facecolor=color,
-        edgecolor=color,
+        edgecolor="black",
         zorder=31,
     )
     ax.add_patch(pennant)
