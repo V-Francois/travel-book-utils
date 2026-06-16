@@ -3,9 +3,11 @@ import geopandas as gpd
 import matplotlib.pyplot as plt
 import matplotlib.patches as mpatches
 import matplotlib.patheffects as path_effects
+from matplotlib.offsetbox import AnnotationBbox, OffsetImage
 import numpy as np
 import pandas as pd
 import xml.etree.ElementTree as ET
+from pathlib import Path
 
 from shapely.geometry import (
     LineString,
@@ -100,6 +102,30 @@ def places_from_csv(path):
     gdf = gpd.GeoDataFrame(df.copy(), geometry=geometry, crs="EPSG:4326")
     gdf["name"] = gdf["name"].astype(str).str.strip()
     return gdf[gdf["name"] != ""].copy()
+
+
+def add_place_image(ax, x, y, img_name, width_px=120):
+    img_path = Path(__file__).resolve().parent / "images" / str(img_name).strip()
+    if not img_path.is_file():
+        return False
+
+    from PIL import Image
+
+    pil_image = Image.open(img_path).convert("RGBA")
+    height_px = max(1, int(round(width_px * pil_image.size[1] / pil_image.size[0])))
+    resample = getattr(Image, "Resampling", Image).LANCZOS
+    pil_image = pil_image.resize((width_px, height_px), resample)
+    image = np.asarray(pil_image)
+
+    ab = AnnotationBbox(
+        OffsetImage(image, zoom=1),
+        (x, y),
+        frameon=False,
+        box_alignment=(0.5, 0.5),
+        zorder=40,
+    )
+    ax.add_artist(ab)
+    return True
 
 
 def bbox_from_route(route_gdf, buffer_meters):
@@ -461,15 +487,12 @@ if start_xy and end_xy:
     draw_route_flag(ax, end_xy, ROUTE_COLOR, marker_size)
 
 for _, row in places.iterrows():
-    fontsize = 22
-    label_place(
-        ax,
-        row.geometry.x,
-        row.geometry.y,
-        row["name"],
-        color="#3f2d1f",
-        fontsize=fontsize,
-    )
+    img_name = row.get("img")
+    if pd.notna(img_name) and str(img_name).strip():
+        if not add_place_image(ax, row.geometry.x, row.geometry.y, img_name, width_px=120):
+            label_place(ax, row.geometry.x, row.geometry.y, row["name"], color="#3f2d1f", fontsize=22)
+    else:
+        label_place(ax, row.geometry.x, row.geometry.y, row["name"], color="#3f2d1f", fontsize=22)
 
 pencil_plot_lines(
     ax,
