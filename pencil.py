@@ -2,6 +2,7 @@ import osmnx as ox
 import geopandas as gpd
 import matplotlib.pyplot as plt
 import numpy as np
+import xml.etree.ElementTree as ET
 
 from shapely.geometry import (
     LineString,
@@ -46,6 +47,30 @@ def safe_features_from_bbox(tags):
     except Exception as e:
         print(f"Could not fetch {tags}: {e}")
         return gpd.GeoDataFrame(geometry=[], crs="EPSG:4326")
+
+
+def route_from_gpx(path):
+    try:
+        root = ET.parse(path).getroot()
+    except Exception as e:
+        print(f"Could not read {path}: {e}")
+        return gpd.GeoDataFrame(geometry=[], crs="EPSG:4326")
+
+    ns = {"g": "http://www.topografix.com/GPX/1/1"}
+    segments = []
+
+    for trkseg in root.findall(".//g:trkseg", ns):
+        coords = []
+        for trkpt in trkseg.findall("g:trkpt", ns):
+            coords.append((float(trkpt.attrib["lon"]), float(trkpt.attrib["lat"])))
+        if len(coords) >= 2:
+            segments.append(LineString(coords))
+
+    if not segments:
+        return gpd.GeoDataFrame(geometry=[], crs="EPSG:4326")
+
+    geometry = segments[0] if len(segments) == 1 else MultiLineString(segments)
+    return gpd.GeoDataFrame(geometry=[geometry], crs="EPSG:4326")
 
 
 def keep_geom_types(gdf, geom_types):
@@ -204,6 +229,9 @@ forest = safe_features_from_bbox({"landuse": "forest"})
 wood = safe_features_from_bbox({"natural": "wood"})
 trees = safe_features_from_bbox({"natural": "tree"})
 
+print("Loading route...")
+route = route_from_gpx("route.gpx")
+
 print("Downloading buildings...")
 buildings = safe_features_from_bbox({"building": True})
 
@@ -237,6 +265,7 @@ water = keep_geom_types(water, ["Polygon", "MultiPolygon"])
 forest = keep_geom_types(forest, ["Polygon", "MultiPolygon"])
 wood = keep_geom_types(wood, ["Polygon", "MultiPolygon"])
 trees = keep_geom_types(trees, ["Point", "MultiPoint"])
+route = keep_geom_types(route, ["LineString", "MultiLineString"])
 buildings = keep_geom_types(buildings, ["Polygon", "MultiPolygon"])
 # pois = keep_geom_types(pois, ["Point", "MultiPoint"])
 
@@ -250,6 +279,7 @@ water = water.to_crs(target_crs)
 forest = forest.to_crs(target_crs)
 wood = wood.to_crs(target_crs)
 trees = trees.to_crs(target_crs)
+route = route.to_crs(target_crs)
 buildings = buildings.to_crs(target_crs)
 # pois = pois.to_crs(target_crs)
 
@@ -318,6 +348,9 @@ pencil_plot_polygons(ax, buildings, facecolor="0.62", edgecolor="0.35", alpha=0.
 
 # Waterways
 pencil_plot_lines(ax, waterways, color="#4f84a8", linewidth=1.15, alpha=0.38, passes=4)
+
+# Route: wide ochre pencil path
+pencil_plot_lines(ax, route, color="#b88a49", linewidth=3.8, alpha=0.52, passes=4)
 
 pencil_plot_lines(
     ax,
