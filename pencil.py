@@ -1,6 +1,7 @@
 import osmnx as ox
 import geopandas as gpd
 import matplotlib.pyplot as plt
+import matplotlib.patches as mpatches
 import numpy as np
 import xml.etree.ElementTree as ET
 
@@ -19,6 +20,7 @@ from shapely.ops import transform
 # Area: your bounding box
 # ----------------------------
 ROUTE_BUFFER_METERS = 400
+ROUTE_COLOR = "#F56F16"
 
 
 # ----------------------------
@@ -66,6 +68,19 @@ def route_from_gpx(path):
 
     geometry = segments[0] if len(segments) == 1 else MultiLineString(segments)
     return gpd.GeoDataFrame(geometry=[geometry], crs="EPSG:4326")
+
+
+def route_endpoints(geom):
+    if isinstance(geom, LineString):
+        coords = list(geom.coords)
+        return coords[0], coords[-1]
+
+    if isinstance(geom, MultiLineString):
+        first = list(geom.geoms[0].coords)[0]
+        last = list(geom.geoms[-1].coords)[-1]
+        return first, last
+
+    return None, None
 
 
 def bbox_from_route(route_gdf, buffer_meters):
@@ -197,6 +212,41 @@ def pencil_plot_polygons(
     pencil_plot_lines(
         ax, outlines, color=edgecolor, linewidth=0.45, alpha=0.25, passes=2
     )
+
+
+def draw_route_start(ax, xy, color, size):
+    x, y = xy
+    ax.scatter([x], [y], s=size * 1.3, c=color, alpha=0.95, zorder=30, linewidths=0)
+    ax.scatter(
+        [x],
+        [y],
+        s=size * 0.45,
+        c="#fcfaf4",
+        alpha=1.0,
+        zorder=31,
+        linewidths=0,
+    )
+
+
+def draw_route_flag(ax, xy, color, size):
+    x, y = xy
+    pole_h = size * 1.8
+    flag_w = size * 1.15
+    flag_h = size * 0.9
+
+    ax.plot([x, x], [y, y + pole_h], color=color, linewidth=1.8, zorder=30)
+    pennant = mpatches.Polygon(
+        [
+            [x, y + pole_h],
+            [x + flag_w, y + pole_h - flag_h * 0.35],
+            [x, y + pole_h - flag_h],
+        ],
+        closed=True,
+        facecolor=color,
+        edgecolor=color,
+        zorder=31,
+    )
+    ax.add_patch(pennant)
 
 
 def add_paper_texture(ax, extent):
@@ -359,8 +409,16 @@ pencil_plot_lines(ax, waterways, color="#4f84a8", linewidth=1.15, alpha=0.38, pa
 
 # Route: wide dark ochre pencil path
 pencil_plot_lines(
-    ax, route, color="#b88a49", linewidth=4.0, alpha=0.50, passes=6, zorder=20
+    ax, route, color=ROUTE_COLOR, linewidth=4.0, alpha=0.50, passes=6, zorder=20
 )
+
+route_geom = route.geometry.iloc[0]
+start_xy, end_xy = route_endpoints(route_geom)
+if start_xy and end_xy:
+    route_scale = max(extent[1] - extent[0], extent[3] - extent[2])
+    marker_size = route_scale * 0.02
+    draw_route_start(ax, start_xy, ROUTE_COLOR, marker_size)
+    draw_route_flag(ax, end_xy, ROUTE_COLOR, marker_size)
 
 pencil_plot_lines(
     ax,
