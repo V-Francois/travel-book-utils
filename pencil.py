@@ -127,7 +127,9 @@ def jitter_geometry(geom, amount):
     return geom
 
 
-def pencil_plot_lines(ax, gdf, color="0.15", linewidth=0.7, alpha=0.35, passes=3):
+def pencil_plot_lines(
+    ax, gdf, color="0.15", linewidth=0.7, alpha=0.35, passes=3, zorder=5
+):
     if gdf.empty:
         return
 
@@ -136,7 +138,7 @@ def pencil_plot_lines(ax, gdf, color="0.15", linewidth=0.7, alpha=0.35, passes=3
         sketch["geometry"] = sketch.geometry.apply(
             lambda g: jitter_geometry(g, PENCIL_JITTER_METERS)
         )
-        sketch.plot(ax=ax, color=color, linewidth=linewidth, alpha=alpha, zorder=5)
+        sketch.plot(ax=ax, color=color, linewidth=linewidth, alpha=alpha, zorder=zorder)
 
 
 def pencil_plot_points(ax, gdf, color="0.15", size=8, alpha=0.3, passes=2):
@@ -349,8 +351,10 @@ pencil_plot_polygons(ax, buildings, facecolor="0.62", edgecolor="0.35", alpha=0.
 # Waterways
 pencil_plot_lines(ax, waterways, color="#4f84a8", linewidth=1.15, alpha=0.38, passes=4)
 
-# Route: wide ochre pencil path
-pencil_plot_lines(ax, route, color="#b88a49", linewidth=3.8, alpha=0.52, passes=4)
+# Route: wide dark ochre pencil path
+pencil_plot_lines(
+    ax, route, color="#b88a49", linewidth=4.0, alpha=0.50, passes=6, zorder=20
+)
 
 pencil_plot_lines(
     ax,
