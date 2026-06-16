@@ -18,12 +18,7 @@ from shapely.ops import transform
 # ----------------------------
 # Area: your bounding box
 # ----------------------------
-north = 47.6897
-south = 47.5884
-west = 3.66
-east = 3.77
-
-bbox = (west, south, east, north)  # OSMnx 2.x: left, bottom, right, top
+ROUTE_BUFFER_METERS = 400
 
 
 # ----------------------------
@@ -71,6 +66,15 @@ def route_from_gpx(path):
 
     geometry = segments[0] if len(segments) == 1 else MultiLineString(segments)
     return gpd.GeoDataFrame(geometry=[geometry], crs="EPSG:4326")
+
+
+def bbox_from_route(route_gdf, buffer_meters):
+    if route_gdf.empty:
+        return None
+
+    buffered = route_gdf.to_crs(route_gdf.estimate_utm_crs()).buffer(buffer_meters)
+    minx, miny, maxx, maxy = buffered.to_crs("EPSG:4326").total_bounds
+    return (minx, miny, maxx, maxy)
 
 
 def keep_geom_types(gdf, geom_types):
@@ -213,6 +217,13 @@ def add_paper_texture(ax, extent):
     )
 
 
+print("Loading route...")
+route = route_from_gpx("route.gpx")
+bbox = bbox_from_route(route, ROUTE_BUFFER_METERS)
+if bbox is None:
+    raise RuntimeError("route.gpx did not contain any track points")
+
+
 # ----------------------------
 # Download data
 # ----------------------------
@@ -230,9 +241,6 @@ print("Downloading forests/trees...")
 forest = safe_features_from_bbox({"landuse": "forest"})
 wood = safe_features_from_bbox({"natural": "wood"})
 trees = safe_features_from_bbox({"natural": "tree"})
-
-print("Loading route...")
-route = route_from_gpx("route.gpx")
 
 print("Downloading buildings...")
 buildings = safe_features_from_bbox({"building": True})
@@ -272,8 +280,7 @@ buildings = keep_geom_types(buildings, ["Polygon", "MultiPolygon"])
 # pois = keep_geom_types(pois, ["Point", "MultiPoint"])
 
 # Use local projected CRS so jitter is in meters
-all_for_crs = gpd.GeoDataFrame(geometry=list(roads.geometry), crs="EPSG:4326")
-target_crs = all_for_crs.estimate_utm_crs()
+target_crs = route.estimate_utm_crs()
 
 roads = roads.to_crs(target_crs)
 waterways = waterways.to_crs(target_crs)
@@ -315,10 +322,9 @@ minor_roads = roads[~roads["is_major"]].copy()
 # ----------------------------
 fig, ax = plt.subplots(figsize=FIGSIZE)
 
-xmin, ymin, xmax, ymax = roads.total_bounds
-pad_x = (xmax - xmin) * 0.04
-pad_y = (ymax - ymin) * 0.04
-extent = (xmin - pad_x, xmax + pad_x, ymin - pad_y, ymax + pad_y)
+route_buffered = route.to_crs(target_crs).buffer(ROUTE_BUFFER_METERS)
+xmin, ymin, xmax, ymax = route_buffered.total_bounds
+extent = (xmin, xmax, ymin, ymax)
 
 ax.set_xlim(extent[0], extent[1])
 ax.set_ylim(extent[2], extent[3])
