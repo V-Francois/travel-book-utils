@@ -134,7 +134,7 @@ def add_paper_texture(ax, extent):
     Simple procedural paper texture: faint grayscale noise.
     """
     xmin, xmax, ymin, ymax = extent
-    noise = np.random.normal(0.88, 0.035, (1400, 1400))
+    noise = np.random.normal(0.92, 0.028, (1400, 1400))
     noise = np.clip(noise, 0, 1)
 
     ax.imshow(
@@ -241,8 +241,8 @@ extent = (xmin - pad_x, xmax + pad_x, ymin - pad_y, ymax + pad_y)
 ax.set_xlim(extent[0], extent[1])
 ax.set_ylim(extent[2], extent[3])
 
-fig.patch.set_facecolor("#f7f2e8")
-ax.set_facecolor("#f7f2e8")
+fig.patch.set_facecolor("#fcfaf4")
+ax.set_facecolor("#fcfaf4")
 
 add_paper_texture(ax, extent)
 
@@ -254,11 +254,6 @@ pencil_plot_polygons(ax, buildings, facecolor="0.62", edgecolor="0.35", alpha=0.
 
 # Waterways
 pencil_plot_lines(ax, waterways, color="#4f84a8", linewidth=1.15, alpha=0.38, passes=4)
-
-# Roads
-pencil_plot_lines(
-    ax, minor_roads, color="0.20", linewidth=0.42, alpha=0.28, passes=N_JITTER_PASSES
-)
 
 pencil_plot_lines(
     ax,
