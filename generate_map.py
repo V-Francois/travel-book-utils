@@ -12,8 +12,8 @@ from shapely.geometry import MultiPolygon
 
 north = 47.6897
 south = 47.5884
-west = 3.6729
-east = 3.7799
+west = 3.66
+east = 3.77
 
 region = box(west, south, east, north)
 
