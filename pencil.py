@@ -279,7 +279,7 @@ def label_place(ax, x, y, text, color, fontsize=16):
         va="center",
         zorder=40,
         path_effects=[
-            path_effects.Stroke(linewidth=3, foreground="#fcfaf4", alpha=0.92),
+            path_effects.Stroke(linewidth=5, foreground="#fcfaf4", alpha=0.92),
             path_effects.Normal(),
         ],
     )
