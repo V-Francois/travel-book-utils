@@ -148,12 +148,17 @@ def soften_geometry(geom, amount=10):
     return softened if not softened.is_empty else geom
 
 
-def pencil_plot_polygons(ax, gdf, facecolor="0.9", edgecolor="0.25", alpha=0.28):
+def pencil_plot_polygons(
+    ax, gdf, facecolor="0.9", edgecolor="0.25", alpha=0.28, outline=True
+):
     if gdf.empty:
         return
 
     base = gdf.copy()
     base.plot(ax=ax, facecolor=facecolor, edgecolor="none", alpha=alpha, zorder=1)
+
+    if not outline:
+        return
 
     # sketchy polygon outlines
     outlines = gdf.copy()
@@ -300,8 +305,12 @@ forest_soft["geometry"] = forest_soft.geometry.apply(lambda g: soften_geometry(g
 wood_soft = wood.copy()
 wood_soft["geometry"] = wood_soft.geometry.apply(lambda g: soften_geometry(g, 14))
 
-pencil_plot_polygons(ax, forest_soft, facecolor="#c6dfb4", edgecolor="#a9c998", alpha=0.24)
-pencil_plot_polygons(ax, wood_soft, facecolor="#c6dfb4", edgecolor="#a9c998", alpha=0.24)
+pencil_plot_polygons(
+    ax, forest_soft, facecolor="#9fcb84", edgecolor="#86ad73", alpha=0.34, outline=False
+)
+pencil_plot_polygons(
+    ax, wood_soft, facecolor="#9fcb84", edgecolor="#86ad73", alpha=0.34, outline=False
+)
 pencil_plot_points(ax, trees, color="#86ad73", size=8, alpha=0.28, passes=2)
 
 # Buildings: faint graphite blocks
