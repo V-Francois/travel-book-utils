@@ -52,9 +52,8 @@ def places_from_dataframe(df: pd.DataFrame) -> gpd.GeoDataFrame:
         return empty_wgs84_gdf()
 
     # Input CSV convention: x is latitude, y is longitude.
-    data = df[df["name"].notna()].copy()
+    data = df.copy()
     data["name"] = data["name"].astype(str).str.strip()
-    data = data[data["name"] != ""]
     if data.empty:
         return empty_wgs84_gdf()
 
