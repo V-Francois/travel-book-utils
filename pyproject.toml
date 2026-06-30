@@ -1,0 +1,31 @@
+[project]
+name = "pencil-map"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.14"
+dependencies = [
+    "matplotlib>=3.11.0",
+    "osmnx>=2.1.0",
+]
+
+[dependency-groups]
+dev = [
+    "ruff",
+    "mypy",
+    "taskipy",
+]
+
+[tool.mypy]
+exclude = ["build"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I"]
+
+[tool.taskipy.tasks]
+format = "ruff format ."
+lint = "ruff check . --fix"
+check-formatting = "ruff format --check ."
+check-linting = "ruff check --select I ."
+check-typing = "mypy ."
+all = "task format && task lint && task check-typing"
