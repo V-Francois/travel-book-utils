@@ -47,6 +47,33 @@ def route_endpoints(geom):
     return None, None
 
 
+def _route_parts(geom):
+    if isinstance(geom, LineString):
+        return [geom]
+    if isinstance(geom, MultiLineString):
+        return list(geom.geoms)
+    raise TypeError(f"Unsupported route geometry: {geom.geom_type}")
+
+
+def concatenate_routes(routes) -> LineString:
+    coords = []
+
+    for route in routes:
+        for part in _route_parts(route):
+            part_coords = list(part.coords)
+            if not part_coords:
+                continue
+            if coords and coords[-1] == part_coords[0]:
+                coords.extend(part_coords[1:])
+            else:
+                coords.extend(part_coords)
+
+    if len(coords) < 2:
+        raise ValueError("At least two route coordinates are required")
+
+    return LineString(coords)
+
+
 def places_from_dataframe(df: pd.DataFrame) -> gpd.GeoDataFrame:
     if df.empty or not {"name", "x", "y"}.issubset(df.columns):
         return empty_wgs84_gdf()

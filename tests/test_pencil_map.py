@@ -4,7 +4,7 @@ from pathlib import Path
 
 import geopandas as gpd
 import pandas as pd
-from shapely.geometry import LineString, Point
+from shapely.geometry import LineString, MultiLineString, Point
 
 
 class PencilMapPackageTest(unittest.TestCase):
@@ -57,6 +57,50 @@ class PencilMapPackageTest(unittest.TestCase):
         self.assertEqual(str(route.crs), "EPSG:4326")
         self.assertTrue(
             route.geometry.iloc[0].equals(LineString([(3.0, 47.0), (3.1, 47.1)]))
+        )
+
+    def test_concatenate_routes_preserves_order(self):
+        from pencil_map.io import concatenate_routes
+
+        combined = concatenate_routes(
+            [
+                LineString([(3.0, 47.0), (3.1, 47.1)]),
+                LineString([(3.1, 47.1), (3.2, 47.2)]),
+                MultiLineString(
+                    [
+                        LineString([(3.2, 47.2), (3.3, 47.3)]),
+                        LineString([(3.3, 47.3), (3.4, 47.4)]),
+                    ]
+                ),
+            ]
+        )
+
+        self.assertEqual(
+            list(combined.coords),
+            [
+                (3.0, 47.0),
+                (3.1, 47.1),
+                (3.2, 47.2),
+                (3.3, 47.3),
+                (3.4, 47.4),
+            ],
+        )
+
+    def test_concatenate_routes_accepts_geometry_array(self):
+        from pencil_map.io import concatenate_routes
+
+        routes = gpd.GeoSeries(
+            [
+                LineString([(3.0, 47.0), (3.1, 47.1)]),
+                LineString([(3.1, 47.1), (3.2, 47.2)]),
+            ],
+            crs="EPSG:4326",
+        )
+
+        combined = concatenate_routes(routes.array)
+
+        self.assertTrue(
+            combined.equals(LineString([(3.0, 47.0), (3.1, 47.1), (3.2, 47.2)]))
         )
 
     def test_bbox_from_route_returns_lon_lat_order(self):
