@@ -85,6 +85,21 @@
   {\sffamily\small\color{tbmuted}#1\par}%
 }
 
+\newsavebox{\tb@pagegraphicbase}
+\newsavebox{\tb@pagegraphicscaled}
+\NewDocumentCommand{\tbpagegraphicbox}{O{} m m m}{%
+  \sbox{\tb@pagegraphicbase}{\includegraphics[#1]{#2}}%
+  \sbox{\tb@pagegraphicscaled}{\resizebox{#3}{!}{\usebox{\tb@pagegraphicbase}}}%
+  \ifdim\dimexpr\ht\tb@pagegraphicscaled+\dp\tb@pagegraphicscaled\relax<#4
+    \resizebox{!}{#4}{\usebox{\tb@pagegraphicbase}}%
+  \else
+    \usebox{\tb@pagegraphicscaled}%
+  \fi
+}
+\NewDocumentCommand{\tbpagegraphic}{O{} m}{%
+  \tbpagegraphicbox[#1]{#2}{\paperwidth}{\paperheight}%
+}
+
 \NewDocumentCommand{\tbimage}{O{} m O{}}{%
   \begin{figure}[p]
     \centering
@@ -100,7 +115,7 @@
     \begin{tikzpicture}[remember picture,overlay]
       \clip (current page.south west) rectangle (current page.north east);
       \node[anchor=center,inner sep=0pt] at (current page.center)
-        {\includegraphics[width=\paperwidth,#1]{#2}};
+        {\tbpagegraphic[#1]{#2}};
       \fill[black,opacity=0.28] (current page.south west) rectangle (current page.north east);
       \fill[tbaccent,opacity=0.92]
         ([xshift=13mm,yshift=19mm]current page.south west)
@@ -115,6 +130,28 @@
   \null\newpage
 }
 
+\NewDocumentCommand{\makebookcoverrotated}{O{-90} O{} m m m}{%
+  \cleardoublepage
+  \thispagestyle{empty}
+  \AddToShipoutPictureBG*{%
+    \begin{tikzpicture}[remember picture,overlay]
+      \clip (current page.south west) rectangle (current page.north east);
+      \node[anchor=center,inner sep=0pt,rotate=#1] at (current page.center)
+        {\tbpagegraphicbox[#2]{#3}{\paperheight}{\paperwidth}};
+      \fill[black,opacity=0.28] (current page.south west) rectangle (current page.north east);
+      \fill[tbaccent,opacity=0.92]
+        ([xshift=13mm,yshift=19mm]current page.south west)
+        rectangle ++(1.8mm,52mm);
+      \node[anchor=south west,text width=.74\paperwidth,align=left]
+        at ([xshift=18mm,yshift=21mm]current page.south west)
+        {{\sffamily\fontsize{29}{31}\selectfont\bfseries\color{white}#4\par}
+         \vspace{5mm}
+         {\sffamily\large\color{white!88}#5\par}};
+    \end{tikzpicture}%
+  }%
+  \null\newpage
+}
+
 \NewDocumentCommand{\makebookbackcover}{O{} m m}{%
   \cleardoublepage
   \thispagestyle{empty}
@@ -122,7 +159,7 @@
     \begin{tikzpicture}[remember picture,overlay]
       \clip (current page.south west) rectangle (current page.north east);
       \node[anchor=center,inner sep=0pt] at (current page.center)
-        {\includegraphics[width=\paperwidth,#1]{#2}};
+        {\tbpagegraphic[#1]{#2}};
       \fill[black,opacity=0.38] (current page.south west) rectangle (current page.north east);
       \node[anchor=south west,text width=.72\paperwidth,align=left]
         at ([xshift=15mm,yshift=18mm]current page.south west)
@@ -160,7 +197,7 @@
     \begin{tikzpicture}[remember picture,overlay]
       \clip (current page.south west) rectangle (current page.north east);
       \node[anchor=center,inner sep=0pt] at (current page.center)
-        {\includegraphics[width=\paperwidth,#1]{#4}};
+        {\tbpagegraphic[#1]{#4}};
       \fill[black,opacity=0.34] (current page.south west) rectangle (current page.north east);
       \fill[tbaccent] ([xshift=13mm,yshift=-18mm]current page.north west) rectangle ++(42mm,3mm);
       \node[anchor=north west,text width=.76\paperwidth,align=left]
