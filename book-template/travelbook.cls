@@ -41,6 +41,7 @@
 \setcounter{secnumdepth}{1}
 \setcounter{tocdepth}{1}
 \renewcommand{\thesection}{\arabic{section}}
+\setsecheadstyle{\sffamily\Large\bfseries\color{tbaccent}}
 
 \captionsetup{
   font={small,sf},
