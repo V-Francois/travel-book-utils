@@ -1,0 +1,51 @@
+\documentclass{travelbook}
+
+\usepackage{mwe}
+
+\title{A Week Elsewhere}
+\author{Francois}
+\date{Summer 2025}
+
+\begin{document}
+
+\frontmatter
+
+\makebookcover[height=\paperheight]{example-image}{A Week Elsewhere}{A small book of sun, streets, and sea}
+
+\mainmatter
+
+\chapterspread[height=\paperheight]{First Light}{Markets, ferries, and the first long walk into town}{example-image-duck}
+
+\begin{travelnote}[Arrival]
+The best travel days leave a few details out of focus: the first coffee, the
+shape of the streets, and the moment the map starts to make sense.
+\end{travelnote}
+
+\fullpagephoto[Morning on the waterfront][height=\paperheight]{example-image-a}
+
+\twophotos
+  {example-image-b}
+  {A quiet street before lunch.}
+  {example-image-c}
+  {Late afternoon color near the old harbor.}
+
+\begin{travelnote}[A small pause]
+Use short notes between image sequences when the book needs rhythm. The class
+keeps them visually quiet so the photographs remain the main event.
+\end{travelnote}
+
+\threephotos
+  {example-image}
+  {A wider editorial image with room for the eye to settle.}
+  {example-image-a}
+  {Texture and detail.}
+  {example-image-b}
+  {A second fragment from the same walk.}
+
+\fullpagephoto[The last swim before packing][width=\paperwidth]{example-image-c}
+
+\backmatter
+
+\makebookbackcover[height=\paperheight]{example-image}{Printed in A5 portrait. Replace these placeholder images with your vacation photographs.}
+
+\end{document}
