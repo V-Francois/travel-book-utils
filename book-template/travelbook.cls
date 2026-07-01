@@ -116,7 +116,7 @@
       \clip (current page.south west) rectangle (current page.north east);
       \node[anchor=center,inner sep=0pt] at (current page.center)
         {\tbpagegraphic[#1]{#2}};
-      \fill[black,opacity=0.28] (current page.south west) rectangle (current page.north east);
+      \fill[black,opacity=0.0] (current page.south west) rectangle (current page.north east);
       \fill[tbaccent,opacity=0.92]
         ([xshift=13mm,yshift=19mm]current page.south west)
         rectangle ++(1.8mm,52mm);
