@@ -68,6 +68,8 @@
 \makeoddfoot{travelbook}{}{}{\tbfolio}
 \makeheadrule{travelbook}{0pt}{0pt}
 \pagestyle{travelbook}
+\aliaspagestyle{plain}{travelbook}
+\aliaspagestyle{chapter}{travelbook}
 
 \newcommand{\travelbookaccent}[1]{\colorlet{tbaccent}{#1}}
 \newcommand{\tb@ifnotempty}[2]{%
