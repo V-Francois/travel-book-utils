@@ -118,10 +118,10 @@
         {\tbpagegraphic[#1]{#2}};
       \fill[black,opacity=0.0] (current page.south west) rectangle (current page.north east);
       \fill[tbaccent,opacity=0.92]
-        ([xshift=13mm,yshift=19mm]current page.south west)
-        rectangle ++(1.8mm,52mm);
-      \node[anchor=south west,text width=.74\paperwidth,align=left]
-        at ([xshift=18mm,yshift=21mm]current page.south west)
+        ([xshift=13mm,yshift=-20mm]current page.north west)
+        rectangle ++(1.8mm,-26mm);
+      \node[anchor=north west,text width=.74\paperwidth,align=left]
+        at ([xshift=18mm,yshift=-20mm]current page.north west)
         {{\sffamily\fontsize{29}{31}\selectfont\bfseries\color{white}#3\par}
          \vspace{5mm}
          {\sffamily\large\color{white!88}#4\par}};
@@ -140,10 +140,10 @@
         {\tbpagegraphicbox[#2]{#3}{\paperheight}{\paperwidth}};
       \fill[black,opacity=0.28] (current page.south west) rectangle (current page.north east);
       \fill[tbaccent,opacity=0.92]
-        ([xshift=13mm,yshift=19mm]current page.south west)
-        rectangle ++(1.8mm,52mm);
-      \node[anchor=south west,text width=.74\paperwidth,align=left]
-        at ([xshift=18mm,yshift=21mm]current page.south west)
+        ([xshift=13mm,yshift=-20mm]current page.north west)
+        rectangle ++(1.8mm,-26mm);
+      \node[anchor=north west,text width=.74\paperwidth,align=left]
+        at ([xshift=18mm,yshift=-20mm]current page.north west)
         {{\sffamily\fontsize{29}{31}\selectfont\bfseries\color{white}#4\par}
          \vspace{5mm}
          {\sffamily\large\color{white!88}#5\par}};
