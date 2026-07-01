@@ -50,9 +50,22 @@
   skip=6pt
 }
 
+\newcommand{\tbfolio}{%
+  \tikz[baseline=(n.base)]{
+    \node[
+      circle,
+      fill=tbaccent,
+      text=white,
+      inner sep=0pt,
+      minimum size=6.5mm,
+      font=\sffamily\scriptsize\bfseries
+    ] (n) {\thepage};
+  }%
+}
+
 \makepagestyle{travelbook}
-\makeevenfoot{travelbook}{\sffamily\small\color{tbmuted}\thepage}{}{}
-\makeoddfoot{travelbook}{}{}{\sffamily\small\color{tbmuted}\thepage}
+\makeevenfoot{travelbook}{\tbfolio}{}{}
+\makeoddfoot{travelbook}{}{}{\tbfolio}
 \makeheadrule{travelbook}{0pt}{0pt}
 \pagestyle{travelbook}
 
