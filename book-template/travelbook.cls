@@ -120,7 +120,7 @@
       \fill[tbaccent,opacity=0.92]
         ([xshift=13mm,yshift=-20mm]current page.north west)
         rectangle ++(1.8mm,-26mm);
-      \node[anchor=north west,text width=.74\paperwidth,align=left]
+      \node[anchor=north west,text width=.78\paperwidth,align=left]
         at ([xshift=18mm,yshift=-20mm]current page.north west)
         {{\sffamily\fontsize{29}{31}\selectfont\bfseries\color{white}#3\par}
          \vspace{5mm}
