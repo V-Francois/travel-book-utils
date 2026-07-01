@@ -38,7 +38,9 @@
 \setlength{\parskip}{0.65\baselineskip}
 \OnehalfSpacing
 \raggedbottom
-\setcounter{secnumdepth}{0}
+\setcounter{secnumdepth}{1}
+\setcounter{tocdepth}{1}
+\renewcommand{\thesection}{\arabic{section}}
 
 \captionsetup{
   font={small,sf},
