@@ -98,29 +98,11 @@
 \NewDocumentCommand{\journeystep}{m m +m}{%
   \refstepcounter{journeystep}%
   \par\noindent
-  \begin{minipage}[t]{9mm}
-    \vspace{0pt}%
-    \centering
-    \tikz[baseline=(n.base)]{
-      \node[
-        circle,
-        fill=tbaccent,
-        text=white,
-        inner sep=0pt,
-        minimum size=6.5mm,
-        font=\sffamily\scriptsize\bfseries
-      ] (n) {\thejourneystep};
-      \draw[tbsoft,line width=1pt] (n.south) -- ++(0,-13mm);
-    }%
-  \end{minipage}%
-  \hspace{3mm}%
-  \begin{minipage}[t]{\dimexpr\linewidth-12mm\relax}
-    \vspace{0pt}%
-    {\sffamily\bfseries\color{tbaccent}#1\,\(\rightarrow\)\,#2\par}%
-    \vspace{0.25\baselineskip}%
-    #3\par
-  \end{minipage}%
-  \par\vspace{0.7\baselineskip}%
+  {\tikz[baseline=-0.55ex]{\draw[tbaccent,line width=1.8pt] (0,0) -- (8mm,0);}}%
+  \hspace{2mm}%
+  {\sffamily\bfseries\color{tbaccent}#1\,\(\rightarrow\)\,#2}%
+  \quad
+  #3\par\vspace{0.45\baselineskip}%
 }
 
 \newsavebox{\tb@pagegraphicbase}
