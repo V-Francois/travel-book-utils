@@ -6,7 +6,6 @@ import numpy as np
 from pencil_map.config import MapConfig
 from pencil_map.drawing import (
     add_paper_texture,
-    draw_border,
     draw_places,
     draw_route_flag,
     draw_route_start,
@@ -146,14 +145,6 @@ def render_prepared_map(prepared: PreparedMap, config: MapConfig | None = None):
         alpha=0.34,
         passes=config.n_jitter_passes + 1,
     )
-    draw_border(
-        ax,
-        prepared.extent,
-        prepared.target_crs,
-        jitter_meters=config.pencil_jitter_meters,
-        rng=rng,
-    )
-
     ax.set_axis_off()
     ax.set_aspect("equal")
     plt.tight_layout(pad=0)
@@ -164,6 +155,6 @@ def save_pencil_map(fig, output_paths, *, dpi: int = 300):
     for output_path in output_paths:
         path = Path(output_path)
         if path.suffix.lower() == ".svg":
-            fig.savefig(path, bbox_inches="tight", pad_inches=0.05)
+            fig.savefig(path, bbox_inches="tight", pad_inches=0)
         else:
-            fig.savefig(path, dpi=dpi, bbox_inches="tight", pad_inches=0.05)
+            fig.savefig(path, dpi=dpi, bbox_inches="tight", pad_inches=0)
