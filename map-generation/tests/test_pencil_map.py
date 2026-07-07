@@ -14,6 +14,7 @@ class PencilMapPackageTest(unittest.TestCase):
         self.assertTrue(hasattr(pencil_map, "MapConfig"))
         self.assertTrue(hasattr(pencil_map, "MapLayers"))
         self.assertTrue(hasattr(pencil_map, "render_pencil_map"))
+        self.assertTrue(hasattr(pencil_map, "scale_bbox_to_ratio"))
 
     def test_places_from_dataframe_uses_latitude_x_and_longitude_y(self):
         from pencil_map.io import places_from_dataframe
@@ -116,6 +117,33 @@ class PencilMapPackageTest(unittest.TestCase):
         self.assertLess(miny, 47.0)
         self.assertGreater(maxx, 3.1)
         self.assertGreater(maxy, 47.1)
+
+    def test_scale_bbox_to_ratio_stretches_width_without_cropping(self):
+        from pencil_map.layers import scale_bbox_to_ratio
+
+        bbox = (0.0, 0.0, 2.0, 2.0)
+
+        scaled = scale_bbox_to_ratio(bbox, 2.0)
+
+        self.assertEqual(scaled, (-1.0, 0.0, 3.0, 2.0))
+
+    def test_scale_bbox_to_ratio_stretches_height_without_cropping(self):
+        from pencil_map.layers import scale_bbox_to_ratio
+
+        bbox = (0.0, 0.0, 4.0, 2.0)
+
+        scaled = scale_bbox_to_ratio(bbox, 1.0)
+
+        self.assertEqual(scaled, (0.0, -1.0, 4.0, 3.0))
+
+    def test_scale_bbox_to_ratio_keeps_matching_bbox(self):
+        from pencil_map.layers import scale_bbox_to_ratio
+
+        bbox = (0.0, 0.0, 4.0, 2.0)
+
+        scaled = scale_bbox_to_ratio(bbox, 2.0)
+
+        self.assertEqual(scaled, bbox)
 
     def test_prepare_layers_projects_and_splits_major_roads(self):
         from pencil_map.layers import MapLayers, PreparedMap, prepare_layers
