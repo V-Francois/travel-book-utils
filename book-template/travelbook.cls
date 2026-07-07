@@ -85,6 +85,44 @@
   {\sffamily\small\color{tbmuted}#1\par}%
 }
 
+\newcounter{journeystep}
+
+\NewDocumentEnvironment{journey}{O{}}{%
+  \par\bigskip
+  \setcounter{journeystep}{0}%
+  \tb@ifnotempty{#1}{\tbkicker{#1}}%
+}{%
+  \par\bigskip
+}
+
+\NewDocumentCommand{\journeystep}{m m +m}{%
+  \refstepcounter{journeystep}%
+  \par\noindent
+  \begin{minipage}[t]{9mm}
+    \vspace{0pt}%
+    \centering
+    \tikz[baseline=(n.base)]{
+      \node[
+        circle,
+        fill=tbaccent,
+        text=white,
+        inner sep=0pt,
+        minimum size=6.5mm,
+        font=\sffamily\scriptsize\bfseries
+      ] (n) {\thejourneystep};
+      \draw[tbsoft,line width=1pt] (n.south) -- ++(0,-13mm);
+    }%
+  \end{minipage}%
+  \hspace{3mm}%
+  \begin{minipage}[t]{\dimexpr\linewidth-12mm\relax}
+    \vspace{0pt}%
+    {\sffamily\bfseries\color{tbaccent}#1\,\(\rightarrow\)\,#2\par}%
+    \vspace{0.25\baselineskip}%
+    #3\par
+  \end{minipage}%
+  \par\vspace{0.7\baselineskip}%
+}
+
 \newsavebox{\tb@pagegraphicbase}
 \newsavebox{\tb@pagegraphicscaled}
 \NewDocumentCommand{\tbpagegraphicbox}{O{} m m m}{%
