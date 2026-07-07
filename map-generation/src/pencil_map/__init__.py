@@ -1,6 +1,12 @@
 from pencil_map.config import MapConfig
 from pencil_map.io import concatenate_routes
-from pencil_map.layers import MapLayers, PreparedMap, bbox_from_route, prepare_layers
+from pencil_map.layers import (
+    MapLayers,
+    PreparedMap,
+    bbox_from_route,
+    prepare_layers,
+    scale_bbox_to_ratio,
+)
 from pencil_map.render import render_pencil_map, save_pencil_map
 
 __all__ = [
@@ -12,4 +18,5 @@ __all__ = [
     "prepare_layers",
     "render_pencil_map",
     "save_pencil_map",
+    "scale_bbox_to_ratio",
 ]

@@ -44,6 +44,36 @@ def bbox_from_route(route_gdf: gpd.GeoDataFrame, buffer_meters: int):
     return (minx, miny, maxx, maxy)
 
 
+def scale_bbox_to_ratio(
+    bbox: tuple[float, float, float, float], aspect_ratio: float
+) -> tuple[float, float, float, float]:
+    minx, miny, maxx, maxy = bbox
+    width = maxx - minx
+    height = maxy - miny
+    if width <= 0 or height <= 0:
+        raise ValueError("bbox must have positive width and height")
+    if aspect_ratio <= 0:
+        raise ValueError("aspect_ratio must be positive")
+
+    current_ratio = width / height
+    center_x = (minx + maxx) / 2
+    center_y = (miny + maxy) / 2
+
+    if current_ratio < aspect_ratio:
+        width = height * aspect_ratio
+    elif current_ratio > aspect_ratio:
+        height = width / aspect_ratio
+
+    half_width = width / 2
+    half_height = height / 2
+    return (
+        center_x - half_width,
+        center_y - half_height,
+        center_x + half_width,
+        center_y + half_height,
+    )
+
+
 def keep_geom_types(gdf: gpd.GeoDataFrame, geom_types: list[str]) -> gpd.GeoDataFrame:
     if gdf.empty:
         return gdf
