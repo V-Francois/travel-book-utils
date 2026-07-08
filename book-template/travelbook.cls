@@ -71,7 +71,7 @@
   \begin{tikzpicture}[remember picture,overlay]
     \ifodd\value{page}
       \fill[tbaccent]
-        (current page.south east) rectangle ++(-9mm,7mm);
+        ([xshift=-12mm]current page.south east) rectangle ++(-9mm,7mm);
       \node[
         anchor=south east,
         text=white,
@@ -79,10 +79,10 @@
         inner sep=0pt,
         minimum width=9mm,
         minimum height=7mm
-      ] at (current page.south east) {\thepage};
+      ] at ([xshift=-12mm]current page.south east) {\thepage};
     \else
       \fill[tbaccent]
-        (current page.south west) rectangle ++(9mm,7mm);
+        ([xshift=12mm]current page.south west) rectangle ++(9mm,7mm);
       \node[
         anchor=south west,
         text=white,
@@ -90,7 +90,7 @@
         inner sep=0pt,
         minimum width=9mm,
         minimum height=7mm
-      ] at (current page.south west) {\thepage};
+      ] at ([xshift=12mm]current page.south west) {\thepage};
     \fi
   \end{tikzpicture}%
 }
