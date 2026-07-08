@@ -29,6 +29,7 @@
 \definecolor{tbink}{HTML}{171717}
 \definecolor{tbmuted}{HTML}{6E7479}
 \definecolor{tbaccent}{HTML}{C84D36}
+\definecolor{tbsecondary}{HTML}{2F6F73}
 \definecolor{tbpaper}{HTML}{FAFAF7}
 \definecolor{tbsoft}{HTML}{ECE8DF}
 
@@ -72,14 +73,15 @@
 \aliaspagestyle{chapter}{travelbook}
 
 \newcommand{\travelbookaccent}[1]{\colorlet{tbaccent}{#1}}
+\newcommand{\travelbooksecondaryaccent}[1]{\colorlet{tbsecondary}{#1}}
 \newcommand{\tb@ifnotempty}[2]{%
   \if\relax\detokenize{#1}\relax\else#2\fi
 }
 \newcommand{\tbkicker}[1]{%
-  {\sffamily\footnotesize\bfseries\color{tbaccent}\MakeUppercase{#1}}\par\vspace{0.4\baselineskip}%
+  {\sffamily\footnotesize\bfseries\color{tbsecondary}\MakeUppercase{#1}}\par\vspace{0.4\baselineskip}%
 }
 \newcommand{\tbjourneytitle}[1]{%
-  {\sffamily\footnotesize\bfseries\color{tbaccent}#1}\par\vspace{0.4\baselineskip}%
+  {\sffamily\footnotesize\bfseries\color{tbsecondary}#1}\par\vspace{0.4\baselineskip}%
 }
 
 \newcommand{\tbcaption}[1]{%
@@ -104,9 +106,9 @@
 \NewDocumentCommand{\journeystep}{m m +m}{%
   \refstepcounter{journeystep}%
   \par\noindent
-  {\tikz[baseline=-0.55ex]{\draw[tbaccent,line width=1.8pt] (0,0) -- (8mm,0);}}%
+  {\tikz[baseline=-0.55ex]{\draw[tbsecondary,line width=1.8pt] (0,0) -- (8mm,0);}}%
   \hspace{2mm}%
-  {\sffamily\bfseries\color{tbaccent}\tbjourneyroute{#1}{#2}}%
+  {\sffamily\bfseries\color{tbsecondary}\tbjourneyroute{#1}{#2}}%
   \quad
   #3\par\vspace{0.45\baselineskip}%
 }
@@ -273,15 +275,15 @@
   \Needspace{6\baselineskip}
   \begin{tcolorbox}[
     enhanced,
-    colback=white,
-    colframe=tbsoft,
+    colback=tbsecondary!4!white,
+    colframe=tbsecondary!20!white,
     boxrule=.5pt,
     arc=0pt,
     left=6mm,
     right=6mm,
     top=5mm,
     bottom=5mm,
-    borderline west={1.8pt}{0pt}{tbaccent}
+    borderline west={1.8pt}{0pt}{tbsecondary}
   ]
   \tbkicker{#1}
   \ignorespaces
