@@ -38,9 +38,8 @@
 \setlength{\parskip}{0.65\baselineskip}
 \OnehalfSpacing
 \raggedbottom
-\setcounter{secnumdepth}{1}
+\setcounter{secnumdepth}{0}
 \setcounter{tocdepth}{1}
-\renewcommand{\thesection}{\arabic{section}}
 \setsecheadstyle{\sffamily\Large\bfseries\color{tbaccent}}
 
 \captionsetup{
@@ -79,6 +78,9 @@
 \newcommand{\tbkicker}[1]{%
   {\sffamily\footnotesize\bfseries\color{tbaccent}\MakeUppercase{#1}}\par\vspace{0.4\baselineskip}%
 }
+\newcommand{\tbjourneytitle}[1]{%
+  {\sffamily\footnotesize\bfseries\color{tbaccent}#1}\par\vspace{0.4\baselineskip}%
+}
 
 \newcommand{\tbcaption}[1]{%
   \par\vspace{0.35\baselineskip}%
@@ -90,9 +92,13 @@
 \NewDocumentEnvironment{journey}{O{}}{%
   \par\bigskip
   \setcounter{journeystep}{0}%
-  \tb@ifnotempty{#1}{\tbkicker{#1}}%
+  \tb@ifnotempty{#1}{\tbjourneytitle{#1}}%
 }{%
   \par\bigskip
+}
+
+\newcommand{\tbjourneyroute}[2]{%
+  #1\tb@ifnotempty{#2}{\,\(\rightarrow\)\,#2}%
 }
 
 \NewDocumentCommand{\journeystep}{m m +m}{%
@@ -100,7 +106,7 @@
   \par\noindent
   {\tikz[baseline=-0.55ex]{\draw[tbaccent,line width=1.8pt] (0,0) -- (8mm,0);}}%
   \hspace{2mm}%
-  {\sffamily\bfseries\color{tbaccent}#1\,\(\rightarrow\)\,#2}%
+  {\sffamily\bfseries\color{tbaccent}\tbjourneyroute{#1}{#2}}%
   \quad
   #3\par\vspace{0.45\baselineskip}%
 }
