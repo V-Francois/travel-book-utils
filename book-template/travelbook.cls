@@ -51,22 +51,62 @@
   skip=6pt
 }
 
-\newcommand{\tbfolio}{%
-  \tikz[baseline=(n.base)]{
-    \node[
-      circle,
-      fill=tbaccent,
-      text=white,
-      inner sep=0pt,
-      minimum size=6.5mm,
-      font=\sffamily\scriptsize\bfseries
-    ] (n) {\thepage};
-  }%
+\makeatletter
+\newif\iftb@foliosenabled
+\newif\iftb@suppressfolio
+\tb@foliosenabledfalse
+\tb@suppressfoliofalse
+
+\let\tb@oldpagenumbering\pagenumbering
+\renewcommand{\pagenumbering}[1]{%
+  \tb@oldpagenumbering{#1}%
+  \global\tb@foliosenabledtrue
+}
+
+\newcommand{\travelbookfolioson}{\global\tb@foliosenabledtrue}
+\newcommand{\travelbookfoliosoff}{\global\tb@foliosenabledfalse}
+\newcommand{\tb@suppressfolioonthispage}{\global\tb@suppressfoliotrue}
+
+\newcommand{\tb@edgefolio}{%
+  \begin{tikzpicture}[remember picture,overlay]
+    \ifodd\value{page}
+      \fill[tbaccent]
+        (current page.south east) rectangle ++(-9mm,7mm);
+      \node[
+        anchor=south east,
+        text=white,
+        font=\sffamily\scriptsize\bfseries,
+        inner sep=0pt,
+        minimum width=9mm,
+        minimum height=7mm
+      ] at (current page.south east) {\thepage};
+    \else
+      \fill[tbaccent]
+        (current page.south west) rectangle ++(9mm,7mm);
+      \node[
+        anchor=south west,
+        text=white,
+        font=\sffamily\scriptsize\bfseries,
+        inner sep=0pt,
+        minimum width=9mm,
+        minimum height=7mm
+      ] at (current page.south west) {\thepage};
+    \fi
+  \end{tikzpicture}%
+}
+\AddToShipoutPictureFG{%
+  \iftb@foliosenabled
+    \iftb@suppressfolio
+    \else
+      \tb@edgefolio
+    \fi
+  \fi
+  \global\tb@suppressfoliofalse
 }
 
 \makepagestyle{travelbook}
-\makeevenfoot{travelbook}{\tbfolio}{}{}
-\makeoddfoot{travelbook}{}{}{\tbfolio}
+\makeevenfoot{travelbook}{}{}{}
+\makeoddfoot{travelbook}{}{}{}
 \makeheadrule{travelbook}{0pt}{0pt}
 \pagestyle{travelbook}
 \aliaspagestyle{plain}{travelbook}
@@ -139,6 +179,7 @@
 \NewDocumentCommand{\makebookcover}{O{} m m m}{%
   \cleardoublepage
   \thispagestyle{empty}
+  \tb@suppressfolioonthispage
   \AddToShipoutPictureBG*{%
     \begin{tikzpicture}[remember picture,overlay]
       \clip (current page.south west) rectangle (current page.north east);
@@ -161,6 +202,7 @@
 \NewDocumentCommand{\makebookcoverrotated}{O{-90} O{} m m m}{%
   \cleardoublepage
   \thispagestyle{empty}
+  \tb@suppressfolioonthispage
   \AddToShipoutPictureBG*{%
     \begin{tikzpicture}[remember picture,overlay]
       \clip (current page.south west) rectangle (current page.north east);
@@ -183,6 +225,7 @@
 \NewDocumentCommand{\makebookbackcover}{O{} m m}{%
   \cleardoublepage
   \thispagestyle{empty}
+  \tb@suppressfolioonthispage
   \AddToShipoutPictureBG*{%
     \begin{tikzpicture}[remember picture,overlay]
       \clip (current page.south west) rectangle (current page.north east);
@@ -200,6 +243,7 @@
 \NewDocumentCommand{\fullpagephoto}{O{} O{width=\paperwidth} m}{%
   \cleardoublepage
   \thispagestyle{empty}
+  \tb@suppressfolioonthispage
   \AddToShipoutPictureBG*{%
     \begin{tikzpicture}[remember picture,overlay]
       \clip (current page.south west) rectangle (current page.north east);
@@ -221,6 +265,7 @@
 \NewDocumentCommand{\chapterspread}{O{} m m m}{%
   \cleardoublepage
   \thispagestyle{empty}
+  \tb@suppressfolioonthispage
   \AddToShipoutPictureBG*{%
     \begin{tikzpicture}[remember picture,overlay]
       \clip (current page.south west) rectangle (current page.north east);
@@ -288,7 +333,8 @@
   \tbkicker{#1}
   \ignorespaces
 }{%
-  \end{tcolorbox}
+\end{tcolorbox}
 }
 
+\makeatother
 \endinput
