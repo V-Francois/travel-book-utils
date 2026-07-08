@@ -80,6 +80,50 @@ Use short notes between image sequences when the book needs rhythm. The class
 keeps them visually quiet so the photographs remain the main event.
 \end{travelnote}
 
+\clearpage
+\thispagestyle{travelbook}
+\begin{tikzpicture}[remember picture,overlay]
+  \node[anchor=north west,inner sep=0pt]
+    at ([xshift=12mm,yshift=-15mm]current page.north west)
+    {\includegraphics[width=124mm]{example-image-16x9}};
+
+  \node[anchor=north west,inner sep=0pt]
+    at ([xshift=12mm,yshift=-94mm]current page.north west)
+    {\includegraphics[height=87mm]{example-image-9x16}};
+
+  \node[anchor=north west,text width=54mm,align=left]
+    at ([xshift=78mm,yshift=-96mm]current page.north west)
+    {{\sffamily\small\color{tbmuted}Mixed orientation page\par}
+     \vspace{3mm}
+     The landscape image gives the scene room to breathe, while the portrait
+     image keeps the memory close: the walk back along the water, tables being
+     cleared, and the last light on the harbor buildings.};
+\end{tikzpicture}
+\null
+
+\clearpage
+\thispagestyle{travelbook}
+\begin{tikzpicture}[remember picture,overlay]
+  \node[anchor=north west,inner sep=0pt]
+    at ([xshift=12mm,yshift=-15mm]current page.north west)
+    {\includegraphics[width=124mm]{example-image-16x9}};
+
+  \node[anchor=north west,text width=54mm,align=left]
+    at ([xshift=12mm,yshift=-96mm]current page.north west)
+    {{\sffamily\small\bfseries\color{tbsecondary}Mirrored mixed page\par}
+     \vspace{3mm}
+     This version gives the text the first position in the lower row, then lets
+     the portrait image close the page. It is useful when the note should read
+     before the smaller visual detail.};
+
+  \node[anchor=north west,inner sep=0pt]
+    at ([xshift=78mm,yshift=-94mm]current page.north west)
+    {\includegraphics[height=87mm]{example-image-9x16}};
+\end{tikzpicture}
+\null
+
+\clearpage
+
 \threephotos
   {example-image}
   {A wider editorial image with room for the eye to settle.}
