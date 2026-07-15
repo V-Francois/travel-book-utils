@@ -234,18 +234,17 @@
   \tb@cleartoevenpage
   \thispagestyle{empty}
   \tb@suppressfolioonthispage
-  \AddToShipoutPictureBG*{%
-    \begin{tikzpicture}[remember picture,overlay]
-      \clip (current page.south west) rectangle (current page.north east);
-      \node[anchor=center,inner sep=0pt] at (current page.center)
-        {\tbpagegraphic[#1]{#2}};
-      \fill[black,opacity=0.38] (current page.south west) rectangle (current page.north east);
-      \node[anchor=south west,text width=.72\paperwidth,align=left]
-        at ([xshift=15mm,yshift=18mm]current page.south west)
-        {{\sffamily\Large\color{white}#3\par}};
-    \end{tikzpicture}%
-  }%
-  \null\newpage
+  \vspace*{24mm}
+  \begin{center}
+    \includegraphics[width=.78\paperwidth,#1]{#2}
+  \end{center}
+  \vspace{8mm}
+  \begin{center}
+    \begin{minipage}{.74\paperwidth}
+      {\sffamily\small\color{tbmuted}#3\par}
+    \end{minipage}
+  \end{center}
+  \clearpage
 }
 
 \NewDocumentCommand{\fullpagephoto}{O{} O{width=\paperwidth} m}{%
