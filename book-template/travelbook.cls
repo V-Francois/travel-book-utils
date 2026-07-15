@@ -234,6 +234,11 @@
   \tb@cleartoevenpage
   \thispagestyle{empty}
   \tb@suppressfolioonthispage
+  \AddToShipoutPictureBG*{%
+    \begin{tikzpicture}[remember picture,overlay]
+      \fill[tbsecondary!8!white] (current page.south west) rectangle (current page.north east);
+    \end{tikzpicture}%
+  }%
   \vspace*{24mm}
   \begin{center}
     \includegraphics[width=.78\paperwidth,#1]{#2}
@@ -241,7 +246,7 @@
   \vspace{8mm}
   \begin{center}
     \begin{minipage}{.74\paperwidth}
-      {\sffamily\small\color{tbmuted}#3\par}
+      {\sffamily\large\color{tbink}#3\par}
     \end{minipage}
   \end{center}
   \clearpage
