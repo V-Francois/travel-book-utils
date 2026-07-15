@@ -13,3 +13,6 @@ class MapConfig:
     dpi: int = 300
     paper_color: str = "#fcfaf4"
     image_dir: Path | None = None
+    plot_minor_roads: bool = False
+    plot_woods: bool = True
+    plot_route: bool = True

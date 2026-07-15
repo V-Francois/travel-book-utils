@@ -51,45 +51,46 @@ def render_prepared_map(prepared: PreparedMap, config: MapConfig | None = None):
         alpha=0.30,
     )
 
-    forest_soft = prepared.forest.copy()
-    forest_soft["geometry"] = forest_soft.geometry.apply(
-        lambda geom: soften_geometry(geom, 14)
-    )
-    wood_soft = prepared.wood.copy()
-    wood_soft["geometry"] = wood_soft.geometry.apply(
-        lambda geom: soften_geometry(geom, 14)
-    )
+    if config.plot_woods:
+        forest_soft = prepared.forest.copy()
+        forest_soft["geometry"] = forest_soft.geometry.apply(
+            lambda geom: soften_geometry(geom, 14)
+        )
+        wood_soft = prepared.wood.copy()
+        wood_soft["geometry"] = wood_soft.geometry.apply(
+            lambda geom: soften_geometry(geom, 14)
+        )
 
-    pencil_plot_polygons(
-        ax,
-        forest_soft,
-        jitter_meters=config.pencil_jitter_meters,
-        rng=rng,
-        facecolor="#9fcb84",
-        edgecolor="#86ad73",
-        alpha=0.34,
-        outline=False,
-    )
-    pencil_plot_polygons(
-        ax,
-        wood_soft,
-        jitter_meters=config.pencil_jitter_meters,
-        rng=rng,
-        facecolor="#9fcb84",
-        edgecolor="#86ad73",
-        alpha=0.34,
-        outline=False,
-    )
-    pencil_plot_points(
-        ax,
-        prepared.trees,
-        jitter_meters=config.pencil_jitter_meters,
-        rng=rng,
-        color="#86ad73",
-        size=8,
-        alpha=0.28,
-        passes=2,
-    )
+        pencil_plot_polygons(
+            ax,
+            forest_soft,
+            jitter_meters=config.pencil_jitter_meters,
+            rng=rng,
+            facecolor="#9fcb84",
+            edgecolor="#86ad73",
+            alpha=0.34,
+            outline=False,
+        )
+        pencil_plot_polygons(
+            ax,
+            wood_soft,
+            jitter_meters=config.pencil_jitter_meters,
+            rng=rng,
+            facecolor="#9fcb84",
+            edgecolor="#86ad73",
+            alpha=0.34,
+            outline=False,
+        )
+        pencil_plot_points(
+            ax,
+            prepared.trees,
+            jitter_meters=config.pencil_jitter_meters,
+            rng=rng,
+            color="#86ad73",
+            size=8,
+            alpha=0.28,
+            passes=2,
+        )
     pencil_plot_polygons(
         ax,
         prepared.buildings,
@@ -109,31 +110,44 @@ def render_prepared_map(prepared: PreparedMap, config: MapConfig | None = None):
         alpha=0.38,
         passes=4,
     )
-    pencil_plot_lines(
-        ax,
-        prepared.route,
-        jitter_meters=config.pencil_jitter_meters,
-        rng=rng,
-        color=config.route_color,
-        linewidth=4.0,
-        alpha=0.50,
-        passes=6,
-        zorder=20,
-    )
-
-    start_xy, end_xy = route_endpoints(prepared.route.geometry.iloc[0])
-    if start_xy and end_xy:
-        route_scale = max(
-            prepared.extent[1] - prepared.extent[0],
-            prepared.extent[3] - prepared.extent[2],
+    if config.plot_route:
+        pencil_plot_lines(
+            ax,
+            prepared.route,
+            jitter_meters=config.pencil_jitter_meters,
+            rng=rng,
+            color=config.route_color,
+            linewidth=4.0,
+            alpha=0.50,
+            passes=6,
+            zorder=20,
         )
-        marker_size = route_scale * 0.02
-        draw_route_start(ax, start_xy, config.route_color, marker_size)
-        draw_route_flag(ax, end_xy, config.route_color, marker_size)
+
+        start_xy, end_xy = route_endpoints(prepared.route.geometry.iloc[0])
+        if start_xy and end_xy:
+            route_scale = max(
+                prepared.extent[1] - prepared.extent[0],
+                prepared.extent[3] - prepared.extent[2],
+            )
+            marker_size = route_scale * 0.02
+            draw_route_start(ax, start_xy, config.route_color, marker_size)
+            draw_route_flag(ax, end_xy, config.route_color, marker_size)
 
     draw_places(
         ax, prepared.places, route_color=config.route_color, image_dir=config.image_dir
     )
+
+    if config.plot_minor_roads:
+        pencil_plot_lines(
+            ax,
+            prepared.minor_roads,
+            jitter_meters=config.pencil_jitter_meters,
+            rng=rng,
+            color="0.10",
+            linewidth=0.95,
+            alpha=0.34,
+            passes=config.n_jitter_passes + 1,
+        )
 
     pencil_plot_lines(
         ax,
