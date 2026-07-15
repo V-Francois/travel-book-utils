@@ -239,17 +239,14 @@
       \fill[tbsecondary!8!white] (current page.south west) rectangle (current page.north east);
     \end{tikzpicture}%
   }%
-  \vspace*{24mm}
-  \begin{center}
-    \includegraphics[width=.78\paperwidth,#1]{#2}
-  \end{center}
-  \vspace{8mm}
-  \begin{center}
-    \begin{minipage}{.74\paperwidth}
-      {\sffamily\large\color{tbink}#3\par}
-    \end{minipage}
-  \end{center}
-  \clearpage
+  \begin{tikzpicture}[remember picture,overlay]
+    \node[anchor=north,inner sep=0pt] at ([yshift=-24mm]current page.north)
+      {\includegraphics[width=.78\paperwidth,#1]{#2}};
+    \node[anchor=north,text width=.74\paperwidth,align=left]
+      at ([yshift=-118mm]current page.north)
+      {{\sffamily\large\color{tbink}#3\par}};
+  \end{tikzpicture}%
+  \null\clearpage
 }
 
 \NewDocumentCommand{\fullpagephoto}{O{} O{width=\paperwidth} m}{%
