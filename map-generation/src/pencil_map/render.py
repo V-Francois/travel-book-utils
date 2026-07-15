@@ -30,7 +30,7 @@ def render_pencil_map(
         places,
         layers,
         config.route_buffer_meters,
-        aspect_ratio=config.figsize[0] / config.figsize[1],
+        aspect_ratio=config.aspect_ratio,
     )
     return render_prepared_map(prepared, config)
 

@@ -2,6 +2,7 @@ from dataclasses import dataclass, field
 from typing import Any
 
 import geopandas as gpd
+from shapely.geometry import box
 
 
 def _empty_gdf(crs: str = "EPSG:4326") -> gpd.GeoDataFrame:
@@ -35,12 +36,23 @@ class PreparedMap:
     extent: tuple[float, float, float, float]
 
 
-def bbox_from_route(route_gdf: gpd.GeoDataFrame, buffer_meters: int):
+def bbox_from_route(
+    route_gdf: gpd.GeoDataFrame,
+    buffer_meters: int,
+    aspect_ratio: float | None = None,
+):
     if route_gdf.empty:
         return None
 
-    buffered = route_gdf.to_crs(route_gdf.estimate_utm_crs()).buffer(buffer_meters)
-    minx, miny, maxx, maxy = buffered.to_crs("EPSG:4326").total_bounds
+    target_crs = route_gdf.estimate_utm_crs()
+    buffered = route_gdf.to_crs(target_crs).buffer(buffer_meters)
+    minx, miny, maxx, maxy = buffered.total_bounds
+    if aspect_ratio is not None:
+        minx, miny, maxx, maxy = scale_bbox_to_ratio(
+            (minx, miny, maxx, maxy), aspect_ratio
+        )
+    bbox_gdf = gpd.GeoDataFrame(geometry=[box(minx, miny, maxx, maxy)], crs=target_crs)
+    minx, miny, maxx, maxy = bbox_gdf.to_crs("EPSG:4326").total_bounds
     return (minx, miny, maxx, maxy)
 
 

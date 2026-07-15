@@ -16,3 +16,7 @@ class MapConfig:
     plot_minor_roads: bool = False
     plot_woods: bool = True
     plot_route: bool = True
+
+    @property
+    def aspect_ratio(self) -> float:
+        return self.figsize[0] / self.figsize[1]

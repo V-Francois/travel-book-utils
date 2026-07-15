@@ -118,6 +118,37 @@ class PencilMapPackageTest(unittest.TestCase):
         self.assertGreater(maxx, 3.1)
         self.assertGreater(maxy, 47.1)
 
+    def test_bbox_from_route_scales_projected_bbox_before_returning_lon_lat(self):
+        from pencil_map.layers import bbox_from_route
+
+        route = gpd.GeoDataFrame(
+            geometry=[LineString([(3.0, 47.0), (3.01, 47.01)])], crs="EPSG:4326"
+        )
+        bbox = bbox_from_route(route, buffer_meters=100, aspect_ratio=2.0)
+        assert bbox is not None
+        projected = (
+            gpd.GeoDataFrame(
+                geometry=[
+                    LineString(
+                        [
+                            (bbox[0], bbox[1]),
+                            (bbox[2], bbox[1]),
+                            (bbox[2], bbox[3]),
+                            (bbox[0], bbox[3]),
+                            (bbox[0], bbox[1]),
+                        ]
+                    )
+                ],
+                crs="EPSG:4326",
+            )
+            .to_crs(route.estimate_utm_crs())
+            .total_bounds
+        )
+        width = projected[2] - projected[0]
+        height = projected[3] - projected[1]
+
+        self.assertAlmostEqual(width / height, 2.0, places=1)
+
     def test_scale_bbox_to_ratio_stretches_width_without_cropping(self):
         from pencil_map.layers import scale_bbox_to_ratio
 
