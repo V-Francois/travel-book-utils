@@ -151,9 +151,9 @@ def render_prepared_map(prepared: PreparedMap, config: MapConfig | None = None):
             prepared.minor_roads,
             jitter_meters=config.pencil_jitter_meters,
             rng=rng,
-            color="0.10",
+            color="gray",
             linewidth=0.95,
-            alpha=0.34,
+            alpha=0.2,
             passes=config.n_jitter_passes + 1,
         )
 

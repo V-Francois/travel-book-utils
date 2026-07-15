@@ -66,6 +66,14 @@
 \newcommand{\travelbookfolioson}{\global\tb@foliosenabledtrue}
 \newcommand{\travelbookfoliosoff}{\global\tb@foliosenabledfalse}
 \newcommand{\tb@suppressfolioonthispage}{\global\tb@suppressfoliotrue}
+\newcommand{\tb@cleartoevenpage}{%
+  \clearpage
+  \ifodd\value{page}%
+    \thispagestyle{empty}%
+    \tb@suppressfolioonthispage
+    \null\newpage
+  \fi
+}
 
 \newcommand{\tb@edgefolio}{%
   \begin{tikzpicture}[remember picture,overlay]
@@ -223,7 +231,7 @@
 }
 
 \NewDocumentCommand{\makebookbackcover}{O{} m m}{%
-  \cleardoublepage
+  \tb@cleartoevenpage
   \thispagestyle{empty}
   \tb@suppressfolioonthispage
   \AddToShipoutPictureBG*{%
