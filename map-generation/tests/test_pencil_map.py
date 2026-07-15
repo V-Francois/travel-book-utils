@@ -145,6 +145,40 @@ class PencilMapPackageTest(unittest.TestCase):
 
         self.assertEqual(scaled, bbox)
 
+    def test_prepare_layers_scales_extent_to_aspect_ratio(self):
+        from pencil_map.layers import MapLayers, prepare_layers
+
+        route = gpd.GeoDataFrame(
+            geometry=[LineString([(3.0, 47.0), (3.01, 47.01)])], crs="EPSG:4326"
+        )
+        places = gpd.GeoDataFrame(geometry=[], crs="EPSG:4326")
+
+        prepared = prepare_layers(
+            route, places, MapLayers(), buffer_meters=100, aspect_ratio=2.0
+        )
+
+        width = prepared.extent[1] - prepared.extent[0]
+        height = prepared.extent[3] - prepared.extent[2]
+        self.assertAlmostEqual(width / height, 2.0)
+
+    def test_save_pencil_map_preserves_figure_ratio(self):
+        import matplotlib.pyplot as plt
+        from PIL import Image
+
+        from pencil_map.render import save_pencil_map
+
+        tmp_path = Path(self._testMethodName)
+        tmp_path.mkdir(exist_ok=True)
+        self.addCleanup(lambda: shutil.rmtree(tmp_path, ignore_errors=True))
+        path = tmp_path / "map.png"
+        fig = plt.figure(figsize=(2, 3))
+        self.addCleanup(lambda: plt.close(fig))
+
+        save_pencil_map(fig, [path], dpi=100)
+
+        with Image.open(path) as image:
+            self.assertEqual(image.size, (200, 300))
+
     def test_prepare_layers_projects_and_splits_major_roads(self):
         from pencil_map.layers import MapLayers, PreparedMap, prepare_layers
 

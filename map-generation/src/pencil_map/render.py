@@ -25,7 +25,13 @@ def render_pencil_map(
     config: MapConfig | None = None,
 ):
     config = config or MapConfig()
-    prepared = prepare_layers(route, places, layers, config.route_buffer_meters)
+    prepared = prepare_layers(
+        route,
+        places,
+        layers,
+        config.route_buffer_meters,
+        aspect_ratio=config.figsize[0] / config.figsize[1],
+    )
     return render_prepared_map(prepared, config)
 
 
@@ -33,6 +39,8 @@ def render_prepared_map(prepared: PreparedMap, config: MapConfig | None = None):
     config = config or MapConfig()
     rng = np.random.default_rng(config.random_seed)
     fig, ax = plt.subplots(figsize=config.figsize)
+    fig.subplots_adjust(left=0, right=1, bottom=0, top=1)
+    ax.set_position((0, 0, 1, 1))
 
     ax.set_xlim(prepared.extent[0], prepared.extent[1])
     ax.set_ylim(prepared.extent[2], prepared.extent[3])
@@ -160,8 +168,7 @@ def render_prepared_map(prepared: PreparedMap, config: MapConfig | None = None):
         passes=config.n_jitter_passes + 1,
     )
     ax.set_axis_off()
-    ax.set_aspect("equal")
-    plt.tight_layout(pad=0)
+    ax.set_aspect("equal", adjustable="box")
     return fig, ax
 
 
@@ -169,6 +176,6 @@ def save_pencil_map(fig, output_paths, *, dpi: int = 300):
     for output_path in output_paths:
         path = Path(output_path)
         if path.suffix.lower() == ".svg":
-            fig.savefig(path, bbox_inches="tight", pad_inches=0)
+            fig.savefig(path)
         else:
-            fig.savefig(path, dpi=dpi, bbox_inches="tight", pad_inches=0)
+            fig.savefig(path, dpi=dpi)

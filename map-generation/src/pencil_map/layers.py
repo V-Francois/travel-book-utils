@@ -108,6 +108,7 @@ def prepare_layers(
     places: gpd.GeoDataFrame,
     layers: MapLayers,
     buffer_meters: int,
+    aspect_ratio: float | None = None,
 ) -> PreparedMap:
     if route.empty:
         raise ValueError("Route GeoDataFrame must contain at least one geometry")
@@ -151,6 +152,10 @@ def prepare_layers(
 
     route_buffered = route.buffer(buffer_meters)
     xmin, ymin, xmax, ymax = route_buffered.total_bounds
+    if aspect_ratio is not None:
+        xmin, ymin, xmax, ymax = scale_bbox_to_ratio(
+            (xmin, ymin, xmax, ymax), aspect_ratio
+        )
     extent = (xmin, xmax, ymin, ymax)
 
     return PreparedMap(
